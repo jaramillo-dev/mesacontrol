@@ -3,7 +3,7 @@
 -- ============================================================
 
 CREATE TABLE usuario (
-                         id SERIAL PRIMARY KEY,
+                         id BIGSERIAL PRIMARY KEY,
                          nombre VARCHAR(255) NOT NULL,
                          email VARCHAR(255) UNIQUE NOT NULL,
                          password VARCHAR(255) NOT NULL,
@@ -12,14 +12,14 @@ CREATE TABLE usuario (
 );
 
 CREATE TABLE cliente (
-                         id SERIAL PRIMARY KEY,
+                         id BIGSERIAL PRIMARY KEY,
                          nombre TEXT NOT NULL,
                          ubicacion TEXT NOT NULL
 );
 
 CREATE TABLE equipo (
-                        id SERIAL PRIMARY KEY,
-                        cliente_id INTEGER NOT NULL REFERENCES cliente(id),
+                        id BIGSERIAL PRIMARY KEY,
+                        cliente_id BIGINT NOT NULL REFERENCES cliente(id),
                         nombre_equipo TEXT NOT NULL,
                         marca TEXT NOT NULL,
                         modelo TEXT NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE equipo (
 );
 
 CREATE TABLE ticket (
-                        id SERIAL PRIMARY KEY,
+                        id BIGSERIAL PRIMARY KEY,
                         folio VARCHAR(50) UNIQUE NOT NULL,
                         tipo VARCHAR(50) NOT NULL,
                         prioridad INTEGER NOT NULL,
@@ -38,15 +38,15 @@ CREATE TABLE ticket (
                         fecha_cierre TIMESTAMP,
                         folio_cotizacion VARCHAR(100),
                         folio_orden_servicio VARCHAR(100),
-                        cliente_id INTEGER NOT NULL REFERENCES cliente(id),
-                        equipo_id INTEGER NOT NULL REFERENCES equipo(id),
-                        responsable_id INTEGER REFERENCES usuario(id)
+                        cliente_id BIGINT NOT NULL REFERENCES cliente(id),
+                        equipo_id BIGINT NOT NULL REFERENCES equipo(id),
+                        responsable_id BIGINT REFERENCES usuario(id)
 );
 
 CREATE TABLE comentario (
-                            id SERIAL PRIMARY KEY,
-                            ticket_id INTEGER NOT NULL REFERENCES ticket(id),
-                            autor_id INTEGER NOT NULL REFERENCES usuario(id),
+                            id BIGSERIAL PRIMARY KEY,
+                            ticket_id BIGINT NOT NULL REFERENCES ticket(id),
+                            autor_id BIGINT NOT NULL REFERENCES usuario(id),
                             comentario TEXT NOT NULL,
                             fecha_creacion TIMESTAMP NOT NULL
 );
@@ -248,5 +248,8 @@ INSERT INTO equipo (id, cliente_id, nombre_equipo, marca, modelo, numero_serie) 
 -- ============================================================
 -- Sincronización de Secuencias (Crucial para evitar PK collisions)
 -- ============================================================
+SELECT setval(pg_get_serial_sequence('usuario', 'id'), coalesce(max(id), 1), max(id) IS NOT null) FROM usuario;
 SELECT setval(pg_get_serial_sequence('cliente', 'id'), coalesce(max(id), 1), max(id) IS NOT null) FROM cliente;
 SELECT setval(pg_get_serial_sequence('equipo', 'id'), coalesce(max(id), 1), max(id) IS NOT null) FROM equipo;
+SELECT setval(pg_get_serial_sequence('ticket', 'id'), coalesce(max(id), 1), max(id) IS NOT null) FROM ticket;
+SELECT setval(pg_get_serial_sequence('comentario', 'id'), coalesce(max(id), 1), max(id) IS NOT null) FROM comentario;
