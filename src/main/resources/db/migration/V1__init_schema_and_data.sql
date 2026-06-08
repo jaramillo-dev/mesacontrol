@@ -7,7 +7,7 @@ CREATE TABLE usuario (
                          nombre VARCHAR(255) NOT NULL,
                          email VARCHAR(255) UNIQUE NOT NULL,
                          password VARCHAR(255) NOT NULL,
-                         rol VARCHAR(50) NOT NULL,
+                         rol VARCHAR(50) NOT NULL CHECK (rol IN ('ADMIN', 'VENTAS', 'TECNICO')),
                          activo BOOLEAN DEFAULT TRUE
 );
 
@@ -52,8 +52,14 @@ CREATE TABLE comentario (
 );
 
 -- ============================================================
--- DML: Carga de Catálogos (Clientes y Equipos)
+-- DML: Carga de Catálogos (Usuarios, Clientes y Equipos)
 -- ============================================================
+
+-- 1. Usuarios (Password para todos: '123456')
+INSERT INTO usuario (nombre, email, password, rol, activo) VALUES
+                                                               ('Admin Principal', 'admin@biometec.mx', '$2a$10$IDzRrqrA8Xfk1dPrwucOp.FtvWrzdaN2NPpjkH8EDyBSe/FxVYMpq', 'ADMIN', true),
+                                                               ('Agente de Ventas', 'ventas@biometec.mx', '$2a$10$IDzRrqrA8Xfk1dPrwucOp.FtvWrzdaN2NPpjkH8EDyBSe/FxVYMpq', 'VENTAS', true),
+                                                               ('Técnico de Soporte', 'tecnico@biometec.mx', '$2a$10$IDzRrqrA8Xfk1dPrwucOp.FtvWrzdaN2NPpjkH8EDyBSe/FxVYMpq', 'TECNICO', true);
 
 -- Clientes
 -- ... (Para mantener la legibilidad, inserta aquí el resto de tus 74 registros de clientes asegurándote de usar "INSERT INTO cliente (id, nombre, ubicacion)") ...
@@ -244,6 +250,7 @@ INSERT INTO equipo (id, cliente_id, nombre_equipo, marca, modelo, numero_serie) 
 INSERT INTO equipo (id, cliente_id, nombre_equipo, marca, modelo, numero_serie) VALUES (106, 74, 'INYECTOR DE MEDIO DE CONTRASTE PARA TOMOGRAFIA COMPUTARIZADA PARA APLICACIONES GENERALES', 'ULRICH MEDICAL', 'CT MOTION', 'CTM1922213');
 INSERT INTO equipo (id, cliente_id, nombre_equipo, marca, modelo, numero_serie) VALUES (107, 75, 'SISTEMA DE DIGITALIZACION DE IMAGENES (RADIOGRAFIA COMPUTARIZADA) DE BAJO DESEMPEÑO PARA MASTOGRAFIA Y RAYOS X DE PROPOSITO GENERAL ', 'CARESTREAM ', 'DIRECTVIEW CLASSIC CR', 'K5241-1183');
 INSERT INTO equipo (id, cliente_id, nombre_equipo, marca, modelo, numero_serie) VALUES (108, 76, 'SISTEMA DE DIGITALIZACION DE IMAGENES (RADIOGRAFIA COMPUTARIZADA) DE BAJO DESEMPEÑO PARA MASTOGRAFIA Y RAYOS X DE PROPOSITO GENERAL ', 'CARESTREAM ', 'DIRECTVIEW CLASSIC CR', 'K5240-8336');
+
 
 -- ============================================================
 -- Sincronización de Secuencias (Crucial para evitar PK collisions)

@@ -1,5 +1,6 @@
 package com.biometec.mesacontrol.security;
 
+import com.biometec.mesacontrol.exception.UsuarioNoEncontradoException;
 import com.biometec.mesacontrol.repository.UsuarioRepository;
 import com.biometec.mesacontrol.entity.Usuario;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,6 @@ public class AppUserDetailsService implements UserDetailsService {
     @Override
     public Usuario loadUserByUsername(String email) throws UsernameNotFoundException {
         return usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + email));
+                .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado con email: " + email));
     }
 }

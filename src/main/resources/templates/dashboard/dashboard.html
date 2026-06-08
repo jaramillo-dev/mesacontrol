@@ -1,47 +1,74 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Mesa de Control - Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+        rel="stylesheet">
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-  <div class="container-fluid">
-    <a class="navbar-brand fw-bold" href="#"><i class="bi bi-speedometer2 me-2"></i>Mesa de Control</a>
-    <div class="d-flex align-items-center">
-      <span class="navbar-text text-white me-3 d-none d-sm-inline" th:text="${username}">usuario@correo.com</span>
-
-      <form th:action="@{/logout}" method="post" class="m-0">
-        <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">
-          <i class="bi bi-box-arrow-left me-1"></i>Salir
-        </button>
-      </form>
-    </div>
-  </div>
-</nav>
+<div th:replace="~{fragments/navbar :: navbar('dashboard')}"></div>
 
 <div class="container mt-5">
-  <div class="p-5 mb-4 bg-white rounded-3 shadow-sm border">
-    <div class="container-fluid py-3">
-      <h1 class="display-6 fw-bold text-dark">¡Autenticación Exitosa!</h1>
-      <p class="col-md-8 fs-5 text-muted">El sistema de Spring Security y la gestión de sesiones concurrentes están operando bajo las restricciones de la Fase 2.</p>
 
-      <div class="card bg-light border-0 mt-4" style="max-width: 500px;">
+  <div class="p-5 mb-4 bg-white rounded-3 shadow-sm border">
+
+    <div class="container-fluid py-3">
+
+      <h1 class="display-6 fw-bold text-dark">
+        ¡Autenticación Exitosa!
+      </h1>
+
+      <p class="col-md-8 fs-5 text-muted">
+        El sistema de login y la gestión de sesiones concurrentes
+        están operando correctamente.
+      </p>
+
+      <div class="card bg-light border-0 mt-4"
+           style="max-width: 500px;">
+
         <div class="card-body">
-          <h5 class="card-title fw-bold text-secondary mb-3"><i class="bi bi-person-badge-fill me-2"></i>Detalles de la Sesión</h5>
-          <p class="mb-1"><strong>Usuario Activo:</strong> <span th:text="${username}">-</span></p>
-          <p class="mb-0"><strong>Roles Asignados (Spring Security):</strong>
-            <span th:each="auth : ${roles}" class="badge bg-primary me-1" th:text="${auth.authority}">ROLE_ADMIN</span>
+
+          <h5 class="card-title fw-bold text-secondary mb-3">
+            <i class="bi bi-person-badge-fill me-2"></i>
+            Detalles de la Sesión
+          </h5>
+
+          <p class="mb-1">
+            <strong>Usuario Activo:</strong>
+            <span th:text="${username}">-</span>
           </p>
+
+          <p class="mb-0">
+            <strong>Roles Asignados:</strong>
+
+            <span th:each="auth : ${roles}"
+                  class="badge bg-primary me-1"
+                  th:text="${auth.authority}">
+                            ROLE_ADMIN
+                        </span>
+
+          </p>
+
         </div>
+
       </div>
+
     </div>
+
   </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
+```

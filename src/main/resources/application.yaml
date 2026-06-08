@@ -21,3 +21,10 @@ spring:
     baseline-on-migrate: true
   application:
     name: mesacontrol
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    cache: false
+    enabled: true

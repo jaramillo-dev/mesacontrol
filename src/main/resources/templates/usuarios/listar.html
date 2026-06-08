@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mesa de Control - Usuarios</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div th:replace="~{fragments/navbar :: navbar('usuarios')}"></div>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark mb-0">
+            <i class="bi bi-people-fill me-2"></i>Gestión de Usuarios
+        </h2>
+        <a th:href="@{/usuarios/nuevo}" class="btn btn-primary shadow-sm">
+            <i class="bi bi-person-plus-fill me-1"></i> Nuevo Usuario
+        </a>
+    </div>
+
+    <!-- Mensajes flash -->
+    <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${mensajeExito}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${mensajeError}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Tabla de usuarios -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0 table-responsive">
+            <table class="table table-hover table-striped align-middle mb-0">
+                <thead class="table-dark">
+                <tr>
+                    <th class="ps-3">Nombre</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th class="text-center pe-3">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="usuario : ${pagina.contenido}">
+                    <td class="ps-3 fw-medium" th:text="${usuario.nombre}">Nombre</td>
+                    <td th:text="${usuario.email}">email@ejemplo.com</td>
+                    <td>
+                            <span class="badge"
+                                  th:class="${usuario.rol} == 'ADMIN' ? 'bg-danger' :
+                                            (${usuario.rol} == 'SUPERVISOR' ? 'bg-warning' : 'bg-secondary')"
+                                  th:text="${usuario.rol}">ROL</span>
+                    </td>
+                    <td>
+                            <span th:if="${usuario.activo}" class="badge bg-success">
+                                <i class="bi bi-check-circle me-1"></i>Activo
+                            </span>
+                        <span th:unless="${usuario.activo}" class="badge bg-danger">
+                                <i class="bi bi-x-circle me-1"></i>Inactivo
+                            </span>
+                    </td>
+                    <td class="text-center pe-3">
+                        <a th:href="@{/usuarios/{id}/editar(id=${usuario.id})}"
+                           class="btn btn-sm btn-info text-white"
+                           title="Editar">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+
+                        <form th:action="@{/usuarios/{id}/toggle-estado(id=${usuario.id})}"
+                              method="post"
+                              class="d-inline">
+                            <button type="submit"
+                                    class="btn btn-sm"
+                                    th:class="${usuario.activo} ? 'btn-warning' : 'btn-success'"
+                                    th:title="${usuario.activo} ? 'Desactivar' : 'Activar'">
+                                <i class="bi"
+                                   th:class="${usuario.activo} ? 'bi-person-x-fill' : 'bi-person-check-fill'"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${pagina.contenido.empty}">
+                    <td colspan="5" class="text-center text-muted py-4">
+                        No hay usuarios registrados en el sistema.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        <div class="card-footer bg-white border-top-0 py-3" th:if="${pagina.totalPaginas > 1}">
+            <nav aria-label="Navegación de páginas">
+                <ul class="pagination pagination-sm justify-content-end mb-0">
+                    <li class="page-item" th:classappend="${pagina.paginaActual == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/usuarios(page=${pagina.paginaActual - 1})}">
+                            Anterior
+                        </a>
+                    </li>
+                    <li class="page-item disabled">
+                <span class="page-link text-dark">
+                    Página [[${pagina.paginaActual + 1}]] de [[${pagina.totalPaginas}]]
+                </span>
+                    </li>
+                    <li class="page-item" th:classappend="${pagina.paginaActual + 1 == pagina.totalPaginas} ? 'disabled'">
+                        <a class="page-link" th:href="@{/usuarios(page=${pagina.paginaActual + 1})}">
+                            Siguiente
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

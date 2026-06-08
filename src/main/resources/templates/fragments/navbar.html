@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm" th:fragment="navbar(paginaActual)">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" th:href="@{/dashboard}">
+            <i class="bi bi-speedometer2 me-2"></i>Mesa de Control
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"
+                    sec:authorize="hasRole('ADMIN')"
+                    th:if="${paginaActual != 'usuarios'}">
+                    <a class="nav-link" th:href="@{/usuarios}">Usuarios</a>
+                </li>
+
+                <li class="nav-item"
+                    th:if="${paginaActual != 'dashboard'}">
+                    <a class="nav-link" th:href="@{/dashboard}">Dashboard</a>
+                </li>
+            </ul>
+
+            <div class="d-flex align-items-center">
+                <span class="navbar-text text-white me-3">
+                    <i class="bi bi-person-circle me-1"></i>
+                    <span th:text="${#authentication.name}">usuario</span>
+                </span>
+
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button type="submit" class="btn btn-sm btn-outline-light">
+                        <i class="bi bi-box-arrow-right me-1"></i>Salir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+</html>

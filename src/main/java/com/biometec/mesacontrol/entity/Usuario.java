@@ -42,7 +42,7 @@ public class Usuario implements UserDetails {
     /**
      * Constructor vacío requerido por JPA
      */
-    protected Usuario() {
+    public Usuario() {
     }
 
     /**
