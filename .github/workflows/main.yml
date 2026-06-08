@@ -1,6 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
+# .github/workflows/main.yml
 name: Build and deploy JAR app to Azure Web App - mvp-spring-demo
 
 on:
@@ -13,7 +11,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read # This is required for actions/checkout
+      contents: read
+
+    # 1. Levantamos un contenedor efímero de PostgreSQL para los tests
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: mesacontrol_db
+          POSTGRES_USER: admin_biometec
+          POSTGRES_PASSWORD: admin_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -23,10 +37,16 @@ jobs:
         with:
           java-version: '21'
           distribution: 'microsoft'
+          cache: 'maven' # 2. Agregamos caché para acelerar futuros builds
 
-      - name: Build with Maven (Skipping tests to avoid DB connection errors in CI)
-        # Usamos package y omitimos tests
-        run: mvn clean package -DskipTests
+      - name: Build and Test with Maven
+        # 3. Inyectamos las credenciales para que Spring Boot se conecte a la DB del CI
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/mesacontrol_db
+          SPRING_DATASOURCE_USERNAME: admin_biometec
+          SPRING_DATASOURCE_PASSWORD: admin_password
+        # 4. Quitamos el skipTests.
+        run: mvn clean package
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -51,5 +71,4 @@ jobs:
           app-name: 'mvp-spring-demo'
           slot-name: 'Production'
           package: '*.jar'
-          # Asegúrate de crear este secreto en tu repositorio de GitHub
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
