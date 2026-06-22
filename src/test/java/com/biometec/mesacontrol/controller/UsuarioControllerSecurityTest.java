@@ -67,12 +67,12 @@ class UsuarioControllerSecurityTest {
     // EDGE CASE 2: ACCESO SIN AUTENTICACIÓN (REFACTURADO)
     // ==========================================
     @Test
-    @DisplayName("Un usuario anónimo que intenta acceder a /usuarios es redirigido al endpoint 401 configurado")
+    @DisplayName("Un usuario anónimo que intenta acceder a /usuarios es redirigido al login")
     void listarTodos_UsuarioAnonimo_DebeRedirigirAlLogin() throws Exception {
         mockMvc.perform(get("/usuarios"))
                 .andExpect(status().is3xxRedirection())
                 // Tus logs confirman que tu SecurityConfig redirige exactamente a '/error/401'
-                .andExpect(redirectedUrl("/error/401"));
+                .andExpect(redirectedUrl("http://localhost/login"));
     }
 
     // ==========================================
