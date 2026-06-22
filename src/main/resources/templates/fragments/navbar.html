@@ -1,44 +1,121 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm" th:fragment="navbar(paginaActual)">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold" th:href="@{/dashboard}">
-            <i class="bi bi-speedometer2 me-2"></i>Mesa de Control
+<nav class="navbar navbar-expand-lg sticky-top"
+     th:fragment="navbar(paginaActual)"
+     style="background-color: #ffffff; border-bottom: 1px solid #e8eaed; padding: 0 1.25rem; height: 60px;">
+
+    <div class="container-fluid px-0">
+
+        <!-- Brand -->
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2 text-decoration-none"
+           th:href="@{/dashboard}"
+           style="letter-spacing: -0.4px; color: #111827;">
+            <div style="width: 32px; height: 32px; background: #1a56db; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="bi bi-speedometer2 text-white" style="font-size: 0.9rem;"></i>
+            </div>
+            <span style="font-size: 0.95rem; font-weight: 600; color: #111827; font-family: 'Segoe UI', system-ui, sans-serif;">Mesa de Control</span>
         </a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
+        <!-- Toggler mobile -->
+        <button class="navbar-toggler border-0 shadow-none p-1" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"
+                style="color: #6b7280;">
+            <i class="bi bi-list fs-4"></i>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"
-                    sec:authorize="hasRole('ADMIN')"
-                    th:if="${paginaActual != 'usuarios'}">
-                    <a class="nav-link" th:href="@{/usuarios}">Usuarios</a>
+
+            <!-- Nav links -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-1">
+
+                <!-- Dashboard inactivo -->
+                <li class="nav-item" th:if="${paginaActual != 'dashboard'}">
+                    <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2"
+                       th:href="@{/dashboard}"
+                       style="font-size: 0.875rem; font-weight: 500; color: #6b7280; transition: background 0.15s ease, color 0.15s ease;"
+                       onmouseover="this.style.background='#f3f4f6';this.style.color='#111827'"
+                       onmouseout="this.style.background='transparent';this.style.color='#6b7280'">
+                        <i class="bi bi-grid-1x2" style="font-size: 0.85rem;"></i>Dashboard
+                    </a>
+                </li>
+                <!-- Dashboard activo -->
+                <li class="nav-item" th:if="${paginaActual == 'dashboard'}">
+                    <span class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2"
+                          style="font-size: 0.875rem; font-weight: 600; color: #1a56db; background: #eff6ff; cursor: default;">
+                        <i class="bi bi-grid-1x2-fill" style="font-size: 0.85rem;"></i>Dashboard
+                    </span>
                 </li>
 
-                <li class="nav-item"
-                    th:if="${paginaActual != 'dashboard'}">
-                    <a class="nav-link" th:href="@{/dashboard}">Dashboard</a>
+                <!-- Tickets inactivo -->
+                <li class="nav-item" th:if="${paginaActual != 'tickets'}">
+                    <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2"
+                       th:href="@{/tickets}"
+                       style="font-size: 0.875rem; font-weight: 500; color: #6b7280; transition: background 0.15s ease, color 0.15s ease;"
+                       onmouseover="this.style.background='#f3f4f6';this.style.color='#111827'"
+                       onmouseout="this.style.background='transparent';this.style.color='#6b7280'">
+                        <i class="bi bi-ticket-detailed" style="font-size: 0.85rem;"></i>Tickets
+                    </a>
                 </li>
+                <!-- Tickets activo -->
+                <li class="nav-item" th:if="${paginaActual == 'tickets'}">
+                    <span class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2"
+                          style="font-size: 0.875rem; font-weight: 600; color: #1a56db; background: #eff6ff; cursor: default;">
+                        <i class="bi bi-ticket-detailed-fill" style="font-size: 0.85rem;"></i>Tickets
+                    </span>
+                </li>
+
+                <!-- Usuarios inactivo (solo ADMIN) -->
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')" th:if="${paginaActual != 'usuarios'}">
+                    <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2"
+                       th:href="@{/usuarios}"
+                       style="font-size: 0.875rem; font-weight: 500; color: #6b7280; transition: background 0.15s ease, color 0.15s ease;"
+                       onmouseover="this.style.background='#f3f4f6';this.style.color='#111827'"
+                       onmouseout="this.style.background='transparent';this.style.color='#6b7280'">
+                        <i class="bi bi-people" style="font-size: 0.85rem;"></i>Usuarios
+                    </a>
+                </li>
+                <!-- Usuarios activo (solo ADMIN) -->
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')" th:if="${paginaActual == 'usuarios'}">
+                    <span class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2"
+                          style="font-size: 0.875rem; font-weight: 600; color: #1a56db; background: #eff6ff; cursor: default;">
+                        <i class="bi bi-people-fill" style="font-size: 0.85rem;"></i>Usuarios
+                    </span>
+                </li>
+
             </ul>
 
-            <div class="d-flex align-items-center">
-                <span class="navbar-text text-white me-3">
-                    <i class="bi bi-person-circle me-1"></i>
-                    <span th:text="${#authentication.name}">usuario</span>
-                </span>
+            <!-- Zona derecha: usuario + logout -->
+            <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
 
+                <!-- Chip de usuario -->
+                <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-2"
+                     style="background: #f9fafb; border: 1px solid #e5e7eb;">
+                    <div style="width: 28px; height: 28px; border-radius: 50%; background: #dbeafe; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="bi bi-person-fill" style="font-size: 0.8rem; color: #1a56db;"></i>
+                    </div>
+                    <div style="line-height: 1.2;">
+                        <div style="font-size: 0.8rem; font-weight: 600; color: #111827;" th:text="${#authentication.name}">usuario</div>
+                        <div style="font-size: 0.7rem; color: #9ca3af;">Sesión activa</div>
+                    </div>
+                </div>
+
+                <!-- Botón salir -->
                 <form th:action="@{/logout}" method="post" class="m-0">
-                    <button type="submit" class="btn btn-sm btn-outline-light">
-                        <i class="bi bi-box-arrow-right me-1"></i>Salir
+                    <button type="submit"
+                            style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.8rem; font-weight: 500; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; cursor: pointer; transition: background 0.15s ease;"
+                            onmouseover="this.style.background='#fee2e2'"
+                            onmouseout="this.style.background='#fef2f2'">
+                        <i class="bi bi-box-arrow-right" style="font-size: 0.9rem;"></i>
+                        Salir
                     </button>
                 </form>
+
             </div>
         </div>
     </div>
 </nav>
+
 </html>

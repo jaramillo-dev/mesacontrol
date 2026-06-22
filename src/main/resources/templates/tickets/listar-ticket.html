@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Tickets - Mesa de Control</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --app-bg: #f4f6f9;
+            --app-card: #ffffff;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --radius-sm: 6px;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --blue-main: #1a56db;
+            --transition: all 0.18s ease;
+        }
+
+        body {
+            background-color: var(--app-bg);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        /* ── Page header ── */
+        .page-header {
+            background: var(--app-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem 1.75rem;
+        }
+
+
+        /* ── Alerts ── */
+        .alert {
+            border-radius: var(--radius-md) !important;
+            border: 1px solid transparent !important;
+            font-size: 0.875rem;
+        }
+
+        /* ── Search bar ── */
+        .search-wrap .form-control {
+            border-radius: var(--radius-md) 0 0 var(--radius-md);
+            border-color: var(--border-color);
+            font-size: 0.85rem;
+            height: 38px;
+            box-shadow: none;
+        }
+        .search-wrap .form-control:focus {
+            border-color: var(--blue-main);
+            box-shadow: 0 0 0 3px rgba(26,86,219,.1);
+        }
+        .search-wrap .btn-search {
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            background: var(--blue-main);
+            border-color: var(--blue-main);
+            color: #fff;
+            height: 38px;
+            padding: 0 14px;
+            font-size: 0.875rem;
+        }
+        .search-wrap .btn-clear {
+            background: #fff;
+            border-color: var(--border-color);
+            border-left: none;
+            border-right: none;
+            color: var(--text-muted);
+            height: 38px;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        .search-wrap .btn-clear:hover { color: #dc2626; }
+
+        /* ── Filter badge ── */
+        .filter-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .filter-chip .chip-value {
+            font-weight: 600;
+            color: var(--blue-main);
+            text-transform: uppercase;
+        }
+        .filter-chip .chip-remove {
+            color: var(--text-muted);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+        }
+        .filter-chip .chip-remove:hover { color: #dc2626; }
+
+        /* ── Filtros rápidos ── */
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            text-decoration: none;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            color: var(--text-secondary);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .filter-btn:hover {
+            background: #f3f4f6;
+            color: var(--text-primary);
+        }
+
+        .filter-btn.active {
+            background: var(--blue-main);
+            border-color: var(--blue-main);
+            color: white;
+        }
+
+        /* ── Table card ── */
+        .table-card {
+            background: var(--app-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        /* ── Table wrapper: scroll both axes ── */
+        .table-scroll {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 70vh;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* ── Table base ── */
+        .data-table {
+            width: 100%;
+            min-width: 820px;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.825rem;
+            color: var(--text-primary);
+        }
+
+        /* Sticky header */
+        .data-table thead th {
+            position: sticky;
+            top: 0;
+            background: #f8f9fb;
+            border-bottom: 1px solid var(--border-color);
+            padding: 11px 16px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.55px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            z-index: 2;
+        }
+
+        .data-table tbody tr {
+            border-bottom: 1px solid #f0f2f5;
+            transition: background 0.15s ease;
+        }
+        .data-table tbody tr:last-child { border-bottom: none; }
+        .data-table tbody tr:hover { background: #f8faff; }
+
+        .data-table tbody td {
+            padding: 13px 16px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        /* ── Folio ── */
+        .cell-folio {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--blue-main);
+            letter-spacing: 0.3px;
+        }
+
+        /* ── Badge base ── */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border-radius: var(--radius-sm);
+            padding: 3px 10px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+
+        /* Tipo */
+        .tag-tipo {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* Prioridad – sin color, solo texto estructurado */
+        .tag-prioridad {
+            background: #f9fafb;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+            font-weight: 600;
+        }
+
+        /* Estado – sin color, solo texto estructurado */
+        .tag-estado {
+            background: #f9fafb;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* ── SLA semáforo ── */
+        .sla-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            border-radius: var(--radius-sm);
+            padding: 4px 11px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+            cursor: default;
+        }
+        /* Verde – sólido, texto blanco */
+        .sla-verde {
+            background: #16a34a;
+            color: #ffffff;
+            border: 1px solid #15803d;
+        }
+        /* Amarillo – ámbar sólido, texto blanco */
+        .sla-amarillo {
+            background: #d97706;
+            color: #ffffff;
+            border: 1px solid #b45309;
+        }
+        /* Rojo – sólido, texto blanco */
+        .sla-rojo {
+            background: #dc2626;
+            color: #ffffff;
+            border: 1px solid #b91c1c;
+        }
+        /* Cerrado – neutro sin cambios */
+        .sla-cerrado {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        /* ── Tooltip SLA (solo hover desktop) ── */
+        [data-sla-tip] { position: relative; }
+        [data-sla-tip]::after {
+            content: attr(data-sla-tip);
+            position: absolute;
+            bottom: calc(100% + 7px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: #f9fafb;
+            font-size: 0.72rem;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            z-index: 100;
+        }
+        [data-sla-tip]::before {
+            content: '';
+            position: absolute;
+            bottom: calc(100% + 2px);
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #1f2937;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            z-index: 100;
+        }
+        [data-sla-tip]:hover::after,
+        [data-sla-tip]:hover::before { opacity: 1; }
+
+        /* ── Unidad médica – truncar con tooltip ── */
+        /*.cell-unidad {*/
+        /*    max-width: 200px;*/
+        /*    overflow: hidden;*/
+        /*    text-overflow: ellipsis;*/
+        /*    white-space: nowrap;*/
+        /*    color: var(--text-secondary);*/
+        /*    font-size: 0.8rem;*/
+        /*}*/
+        .cell-unidad {
+            display: inline-block;
+            max-width: 160px; /* o incluso 140px */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ── Btn gestionar ── */
+        .btn-gestionar {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 13px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: #374151;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .btn-gestionar:hover {
+            background: #f0f4ff;
+            border-color: #93c5fd;
+            color: var(--blue-main);
+        }
+        .btn-gestionar i { font-size: 0.8rem; }
+
+        /* ── Btn nuevo ticket ── */
+        .btn-nuevo {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #fff;
+            background: var(--blue-main);
+            border: 1px solid var(--blue-main);
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        .btn-nuevo:hover {
+            background: #1649c0;
+            border-color: #1649c0;
+            color: #fff;
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            padding: 3.5rem 1rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .empty-state i {
+            font-size: 2.5rem;
+            color: #d1d5db;
+            display: block;
+            margin-bottom: 1rem;
+        }
+        .empty-state h5 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+        }
+        .empty-state p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            max-width: 380px;
+            margin: 0 auto 1.25rem;
+        }
+
+        /* ── Pagination info ── */
+        .pag-info {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .pag-info strong { color: var(--text-primary); }
+
+        /* ── Mobile: cards bajo 640px ── */
+        @media (max-width: 640px) {
+            .table-scroll { max-height: none; overflow: visible; }
+            .data-table, .data-table thead, .data-table tbody,
+            .data-table tr, .data-table td { display: block; width: 100%; }
+            .data-table thead { display: none; }
+            .data-table tbody tr {
+                border: 1px solid var(--border-color);
+                border-radius: var(--radius-md);
+                margin: 0 1rem 0.75rem;
+                width: calc(100% - 2rem);
+                background: #fff;
+                padding: 0.75rem 0;
+            }
+            .data-table tbody tr:hover { background: #fff; }
+            .data-table tbody td {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 7px 14px;
+                border-bottom: 1px solid #f3f4f6;
+                white-space: normal;
+            }
+            .data-table tbody td:last-child { border-bottom: none; }
+            .data-table tbody td::before {
+                content: attr(data-label);
+                font-size: 0.7rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.4px;
+                color: var(--text-muted);
+                flex-shrink: 0;
+                margin-right: 10px;
+            }
+            .cell-unidad { max-width: 160px; }
+            .page-header { padding: 1.25rem; }
+        }
+    </style>
+</head>
+
+<body>
+<div th:replace="~{fragments/navbar :: navbar('tickets')}"></div>
+
+<div class="container-fluid px-3 px-md-4 mt-4 mb-5" style="max-width: 1400px;">
+
+    <!-- Alertas -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 py-3 mb-3" role="alert">
+        <i class="bi bi-check-circle-fill"></i>
+        <span th:text="${success}">Operación exitosa</span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 py-3 mb-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span th:text="${error}">Ha ocurrido un error</span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Page header -->
+    <div class="page-header mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+        <div>
+            <h2 class="m-0 d-flex align-items-center gap-2" style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">
+                <i class="bi bi-ticket-perforated-fill" style="color: var(--blue-main); font-size: 1.1rem;"></i>
+                Gestión de Tickets
+            </h2>
+            <p class="mb-0 mt-1" style="font-size: 0.82rem; color: var(--text-secondary);">
+                Listado general y monitoreo de incidentes y requerimientos asignados.
+            </p>
+        </div>
+        <a th:href="@{/tickets/nuevo}"
+           class="btn-nuevo flex-shrink-0"
+           sec:authorize="hasRole('ADMIN')">
+            <i class="bi bi-plus-lg"></i>Nuevo Ticket
+        </a>
+    </div>
+
+    <!-- Barra de búsqueda + filtro activo -->
+    <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+
+        <form th:action="@{/tickets}" method="GET" class="search-wrap d-flex" style="min-width: 380px; max-width: 550px; flex: 1 1 380px;">
+            <div class="input-group" style="height: 38px;">
+
+                <select name="filtro" class="form-select border-end-0 shadow-none bg-light"
+                        onchange="this.form.submit()"
+                        style="max-width: 130px; border-radius: var(--radius-md) 0 0 var(--radius-md); font-size: 0.85rem; border-color: var(--border-color);">
+                    <option value="">Todos</option>
+                    <option value="ABIERTO" th:selected="${filtroActivo == 'ABIERTO'}">Abiertos</option>
+                    <option value="EN_PROCESO" th:selected="${filtroActivo == 'EN_PROCESO'}">En Proceso</option>
+                    <option value="CERRADO" th:selected="${filtroActivo == 'CERRADO'}">Cerrados</option>
+                    <option value="VENCIDO" th:selected="${filtroActivo == 'VENCIDO'}">Vencidos</option>
+                </select>
+
+                <input type="text" name="folio"
+                       class="form-control border-start-0"
+                       style="border-radius: 0; border-left: 1px solid var(--border-color); text-transform: uppercase;"
+                       placeholder="Buscar folio (TK-2026…)"
+                       th:value="${folioBusqueda}">
+
+                <a th:if="${(folioBusqueda != null and !#strings.isEmpty(folioBusqueda)) or (filtroActivo != null and !#strings.isEmpty(filtroActivo))}"
+                   th:href="@{/tickets}"
+                   class="btn-clear border"
+                   title="Limpiar filtros">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+
+                <button type="submit" class="btn-search border-0">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-card">
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+
+                <tr>
+                    <th style="padding-left: 20px;">Folio</th>
+                    <th>Tipo</th>
+                    <th>Prioridad</th>
+                    <th>Estado</th>
+                    <th>Unidad Médica</th>
+                    <th>Vencimiento</th>
+                    <!--                    <th style="text-align: right; padding-right: 20px;">Acciones</th>-->
+                    <th style="width: 120px; text-align:right; padding-right:20px;">
+                        Acciones
+                    </th>
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                <tr th:each="ticket : ${tickets.content}">
+
+                    <!-- Folio -->
+                    <td data-label="Folio" style="padding-left: 20px;">
+                        <span class="cell-folio" th:text="${ticket.folio}">TK-000</span>
+                    </td>
+
+                    <!-- Tipo -->
+                    <td data-label="Tipo">
+                        <span class="tag tag-tipo" th:text="${ticket.tipo.descripcion}">VENTA</span>
+                    </td>
+
+                    <!-- Prioridad – sin color, solo texto -->
+                    <td data-label="Prioridad">
+                        <span class="tag tag-prioridad" th:text="${ticket.prioridad.descripcion}">ALTA</span>
+                    </td>
+
+                    <!-- Estado – sin color, solo texto -->
+                    <td data-label="Estado">
+                        <span class="tag tag-estado" th:text="${ticket.estado.descripcion}">EN PROCESO</span>
+                    </td>
+
+                    <!-- Unidad médica con tooltip -->
+                    <td data-label="Unidad Médica"
+                        th:title="${ticket.clienteNombre}">
+                        <span class="cell-unidad" th:text="${ticket.clienteNombre}">Hospital de Especialidades</span>
+                    </td>
+
+                    <!-- SLA: cerrado -->
+                    <td data-label="Vencimiento / Cierre">
+                            <span th:if="${ticket.slaSemaforo == 'FINALIZADO'}"
+                                  class="sla-badge sla-cerrado">
+                                <i class="bi bi-lock-fill"></i>
+                                <span>Cerrado:</span>
+                                <span th:text="${#temporals.format(ticket.fechaCierre, 'dd/MM/yyyy HH:mm')}">01/01/2026</span>
+                            </span>
+
+                        <!-- SLA: verde -->
+                        <span th:if="${ticket.slaSemaforo == 'VERDE'}"
+                              class="sla-badge sla-verde"
+                              data-sla-tip="✓ A tiempo">
+                                <i class="bi bi-shield-fill-check"></i>
+                                <span th:text="${#temporals.format(ticket.fechaVencimientoSla, 'dd/MM/yyyy HH:mm')}">15/06/2026</span>
+                            </span>
+
+                        <!-- SLA: amarillo -->
+                        <span th:if="${ticket.slaSemaforo == 'AMARILLO'}"
+                              class="sla-badge sla-amarillo"
+                              data-sla-tip="⚠ Próximo a vencer">
+                                <i class="bi bi-hourglass-split"></i>
+                                <span th:text="${#temporals.format(ticket.fechaVencimientoSla, 'dd/MM/yyyy HH:mm')}">15/06/2026</span>
+                            </span>
+
+                        <!-- SLA: rojo -->
+                        <span th:if="${ticket.slaSemaforo == 'ROJO'}"
+                              class="sla-badge sla-rojo"
+                              data-sla-tip="✕ Vencido">
+                                <i class="bi bi-exclamation-octagon-fill"></i>
+                                <span th:text="${#temporals.format(ticket.fechaVencimientoSla, 'dd/MM/yyyy HH:mm')}">15/06/2026</span>
+                            </span>
+                    </td>
+
+                    <!-- Acciones -->
+                    <td data-label="Acciones"
+                        style="width:120px; text-align:right; padding-right:20px;">
+                        <a th:href="@{/tickets/{folio}(folio=${ticket.folio})}" class="btn-gestionar">
+                            <i class="bi bi-arrow-right-circle"></i>
+                            Gestionar
+                        </a>
+                    </td>
+                </tr>
+
+                <!-- Estado vacío -->
+                <tr th:if="${#lists.isEmpty(tickets.content)}">
+                    <td colspan="7" style="padding: 0;">
+                        <div class="empty-state">
+                            <i class="bi bi-folder-x"></i>
+                            <h5>No se encontraron tickets</h5>
+                            <p th:text="${filtroActivo != null or folioBusqueda != null}
+                                    ? 'Ningún ticket coincide con los criterios de búsqueda o filtros activos.'
+                                    : 'No existen solicitudes de servicio asignadas en esta bandeja.'">
+                                Mensaje informativo
+                            </p>
+                            <a th:if="${filtroActivo != null or folioBusqueda != null}"
+                               th:href="@{/tickets}"
+                               class="btn-nuevo" style="margin: 0 auto; display: inline-flex;">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                                Restablecer bandeja
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!--    Paginacion-->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mt-4 px-2" th:if="${tickets.totalPages > 1}">
+
+        <div class="pag-info mb-3 mb-sm-0">
+            Mostrando página <strong th:text="${tickets.number + 1}">1</strong> de <strong th:text="${tickets.totalPages}">5</strong>
+        </div>
+
+        <nav aria-label="Navegación de tickets">
+            <ul class="pagination pagination-sm mb-0 gap-2">
+                <li class="page-item" th:classappend="${tickets.first} ? 'disabled'">
+                    <a class="page-link border rounded-3 px-3 py-1.5 fw-medium text-secondary shadow-sm"
+                       th:href="@{/tickets(page=${tickets.number - 1}, folio=${folioBusqueda}, filtro=${filtroActivo})}">
+                        <i class="bi bi-chevron-left me-1 small"></i> Anterior
+                    </a>
+                </li>
+
+                <li class="page-item" th:classappend="${tickets.last} ? 'disabled'">
+                    <a class="page-link border rounded-3 px-3 py-1.5 fw-medium text-secondary shadow-sm"
+                       th:href="@{/tickets(page=${tickets.number + 1}, folio=${folioBusqueda}, filtro=${filtroActivo})}">
+                        Siguiente <i class="bi bi-chevron-right ms-1 small"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

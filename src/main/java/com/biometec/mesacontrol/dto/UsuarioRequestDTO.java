@@ -3,6 +3,22 @@ package com.biometec.mesacontrol.dto;
 import com.biometec.mesacontrol.entity.Rol;
 import jakarta.validation.constraints.*;
 
+/**
+ * DTO utilizado para la captura y actualización de usuarios.
+ *
+ * <p>
+ * Centraliza las reglas de validación asociadas al formulario de usuarios
+ * y desacopla la capa web de las entidades persistentes.
+ * </p>
+ *
+ * <p>
+ * Utiliza grupos de validación para diferenciar los requisitos de alta
+ * y modificación, especialmente para el manejo de contraseñas.
+ * </p>
+ *
+ * @author Juan Jaramillo
+ * @version 1.0
+ */
 public class UsuarioRequestDTO {
 
     @NotBlank(message = "El nombre es obligatorio")

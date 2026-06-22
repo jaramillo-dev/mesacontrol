@@ -1,0 +1,30 @@
+# ===================================================================
+# Entorno de Pruebas Unitarias e Integración (Perfil: test)
+# ===================================================================
+
+spring:
+  datasource:
+    # Apunta a una base de datos aislada para pruebas
+    url: jdbc:postgresql://localhost:5432/mesacontrol_test
+    username: admin_biometec
+    password: admin_password
+    driver-class-name: org.postgresql.Driver
+
+  # JPA / Hibernate específico para pruebas
+  jpa:
+    hibernate:
+      # Validamos el esquema contra las migraciones de Flyway
+      ddl-auto: validate
+    show-sql: false # Falso para mantener los logs limpios durante los tests masivos
+    properties:
+      hibernate:
+        format_sql: false
+
+  # Flyway migrará la estructura limpia a tu BD de pruebas de forma automática
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+  # Desactivar caché de Thymeleaf innecesario en entorno de pruebas
+  thymeleaf:
+    cache: false

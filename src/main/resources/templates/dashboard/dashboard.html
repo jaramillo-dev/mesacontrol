@@ -1,74 +1,335 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      lang="es">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="es">
+
 <head>
   <meta charset="UTF-8">
-  <title>Mesa de Control - Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Dashboard - Mesa de Control</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-        rel="stylesheet">
+  <style>
+    /* ── Tokens compartidos con listar-ticket ── */
+    :root {
+      --app-bg: #f4f6f9;
+      --app-card: #ffffff;
+      --radius-lg: 12px;
+      --radius-md: 8px;
+      --radius-sm: 6px;
+      --border-color: #e5e7eb;
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --blue-main: #1a56db;
+      --transition: all 0.2s ease;
+    }
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
-        rel="stylesheet">
+    body {
+      background-color: var(--app-bg);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+    }
+
+    /* ── Page header ── */
+    .page-header {
+      background: var(--app-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 1.75rem;
+    }
+    .page-header h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+      line-height: 1.3;
+    }
+    .page-header h2 i {
+      color: var(--blue-main);
+      font-size: 1.25rem;
+    }
+    .page-header p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin: 0.35rem 0 0;
+      line-height: 1.5;
+    }
+
+    /* ── Btn ir a tickets ── */
+    .btn-tickets {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #fff;
+      background: var(--blue-main);
+      border: 1px solid var(--blue-main);
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .btn-tickets::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.12);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .btn-tickets:hover {
+      background: #1649c0;
+      border-color: #1649c0;
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(26,86,219,0.35);
+    }
+    .btn-tickets:hover::before { opacity: 1; }
+    .btn-tickets:active { transform: translateY(0); box-shadow: none; }
+    .btn-tickets i { font-size: 0.9rem; }
+
+    /* ── KPI cards ── */
+    .kpi-link {
+      text-decoration: none;
+      display: block;
+    }
+
+    .kpi-card {
+      background: var(--app-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.4rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      cursor: pointer;
+      height: 100%;
+    }
+
+    /* Barra lateral indicadora */
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      border-radius: 12px 0 0 12px;
+      transition: width 0.2s ease;
+    }
+
+    /* Brillo interior al hover */
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.22s ease;
+      border-radius: var(--radius-lg);
+      pointer-events: none;
+    }
+
+    .kpi-link:hover .kpi-card {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+    }
+    .kpi-link:hover .kpi-card::before { width: 6px; }
+    .kpi-link:hover .kpi-card::after  { opacity: 1; }
+    .kpi-link:active .kpi-card { transform: translateY(-1px); }
+
+    /* ── Variantes por estado ── */
+
+    /* Abierto – gris azulado */
+    .kpi-abierto::before         { background: #64748b; }
+    .kpi-abierto::after          { background: linear-gradient(135deg, rgba(100,116,139,.04) 0%, transparent 60%); }
+    .kpi-link:hover .kpi-abierto { border-color: #94a3b8; box-shadow: 0 8px 24px rgba(100,116,139,.14); }
+
+    /* En proceso – azul */
+    .kpi-proceso::before         { background: var(--blue-main); }
+    .kpi-proceso::after          { background: linear-gradient(135deg, rgba(26,86,219,.05) 0%, transparent 60%); }
+    .kpi-link:hover .kpi-proceso { border-color: #93c5fd; box-shadow: 0 8px 24px rgba(26,86,219,.16); }
+
+    /* Cerrado – verde */
+    .kpi-cerrado::before         { background: #16a34a; }
+    .kpi-cerrado::after          { background: linear-gradient(135deg, rgba(22,163,74,.05) 0%, transparent 60%); }
+    .kpi-link:hover .kpi-cerrado { border-color: #86efac; box-shadow: 0 8px 24px rgba(22,163,74,.14); }
+
+    /* SLA Vencido – rojo */
+    .kpi-vencido::before         { background: #dc2626; }
+    .kpi-vencido::after          { background: linear-gradient(135deg, rgba(220,38,38,.05) 0%, transparent 60%); }
+    .kpi-link:hover .kpi-vencido { border-color: #fca5a5; box-shadow: 0 8px 24px rgba(220,38,38,.14); }
+
+    /* ── Icono KPI ── */
+    .kpi-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+    }
+    .kpi-link:hover .kpi-icon { transform: scale(1.08); }
+
+    .kpi-icon-grey   { background: #f1f5f9; color: #475569; }
+    .kpi-icon-blue   { background: #dbeafe; color: var(--blue-main); }
+    .kpi-icon-green  { background: #dcfce7; color: #16a34a; }
+    .kpi-icon-red    { background: #fee2e2; color: #dc2626; }
+
+    /* ── Número KPI ── */
+    .kpi-number {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+      margin: 0.35rem 0 0;
+      letter-spacing: -0.5px;
+      transition: color 0.2s ease;
+    }
+    .kpi-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.55px;
+      color: var(--text-muted);
+    }
+
+    /* Colores del número según estado */
+    .num-grey  { color: #475569; }
+    .num-blue  { color: var(--blue-main); }
+    .num-green { color: #16a34a; }
+    .num-red   { color: #dc2626; }
+
+    /* Flecha chevron – aparece en hover */
+    .kpi-arrow {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      font-size: 0.75rem;
+      opacity: 0;
+      transform: translateX(-4px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      color: var(--text-muted);
+    }
+    .kpi-link:hover .kpi-arrow {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 640px) {
+      .page-header { padding: 1.1rem 1.25rem; }
+      .page-header h2 { font-size: 1.1rem; }
+      .kpi-card { padding: 1.1rem 1.25rem; }
+      .kpi-number { font-size: 1.65rem; }
+    }
+  </style>
 </head>
-<body class="bg-light">
+
+<body>
 
 <div th:replace="~{fragments/navbar :: navbar('dashboard')}"></div>
 
-<div class="container mt-5">
+<div class="container-fluid px-3 px-md-4 mt-4 mb-5" style="max-width: 1400px; margin-left: auto; margin-right: auto;">
 
-  <div class="p-5 mb-4 bg-white rounded-3 shadow-sm border">
+  <!-- Page header -->
+  <div class="page-header mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+    <div>
+      <h2 class="d-flex align-items-center gap-2">
+        <i class="bi bi-grid-1x2-fill"></i>
+        Panel de Control
+      </h2>
+      <p>Bienvenido al sistema de Mesa de Control Biometec</p>
+    </div>
+    <a th:href="@{/tickets}" class="btn-tickets">
+      <i class="bi bi-ticket-detailed-fill"></i>
+      Ir a Mis Tickets
+      <i class="bi bi-arrow-right ms-1" style="font-size: 0.8rem; opacity: 0.8;"></i>
+    </a>
+  </div>
 
-    <div class="container-fluid py-3">
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-4">
 
-      <h1 class="display-6 fw-bold text-dark">
-        ¡Autenticación Exitosa!
-      </h1>
-
-      <p class="col-md-8 fs-5 text-muted">
-        El sistema de login y la gestión de sesiones concurrentes
-        están operando correctamente.
-      </p>
-
-      <div class="card bg-light border-0 mt-4"
-           style="max-width: 500px;">
-
-        <div class="card-body">
-
-          <h5 class="card-title fw-bold text-secondary mb-3">
-            <i class="bi bi-person-badge-fill me-2"></i>
-            Detalles de la Sesión
-          </h5>
-
-          <p class="mb-1">
-            <strong>Usuario Activo:</strong>
-            <span th:text="${username}">-</span>
-          </p>
-
-          <p class="mb-0">
-            <strong>Roles Asignados:</strong>
-
-            <span th:each="auth : ${roles}"
-                  class="badge bg-primary me-1"
-                  th:text="${auth.authority}">
-                            ROLE_ADMIN
-                        </span>
-
-          </p>
-
+    <!-- Abiertos -->
+    <div class="col-6 col-md-3">
+      <a th:href="@{/tickets(filtro='ABIERTO')}" class="kpi-link">
+        <div class="kpi-card kpi-abierto">
+          <div class="d-flex align-items-start justify-content-between">
+            <div>
+              <div class="kpi-label">Abiertos</div>
+              <div class="kpi-number num-grey" th:text="${stats.abiertos}">0</div>
+            </div>
+            <div class="kpi-icon kpi-icon-grey">
+              <i class="bi bi-envelope-open-fill"></i>
+            </div>
+          </div>
+<!--          <i class="bi bi-chevron-right kpi-arrow"></i>-->
         </div>
+      </a>
+    </div>
 
-      </div>
+    <!-- En proceso -->
+    <div class="col-6 col-md-3">
+      <a th:href="@{/tickets(filtro='EN_PROCESO')}" class="kpi-link">
+        <div class="kpi-card kpi-proceso">
+          <div class="d-flex align-items-start justify-content-between">
+            <div>
+              <div class="kpi-label">En Proceso</div>
+              <div class="kpi-number num-blue" th:text="${stats.enProceso}">0</div>
+            </div>
+            <div class="kpi-icon kpi-icon-blue">
+              <i class="bi bi-gear-wide-connected"></i>
+            </div>
+          </div>
+<!--          <i class="bi bi-chevron-right kpi-arrow"></i>-->
+        </div>
+      </a>
+    </div>
 
+    <!-- Cerrados -->
+    <div class="col-6 col-md-3">
+      <a th:href="@{/tickets(filtro='CERRADO')}" class="kpi-link">
+        <div class="kpi-card kpi-cerrado">
+          <div class="d-flex align-items-start justify-content-between">
+            <div>
+              <div class="kpi-label">Cerrados</div>
+              <div class="kpi-number num-green" th:text="${stats.cerrados}">0</div>
+            </div>
+            <div class="kpi-icon kpi-icon-green">
+              <i class="bi bi-check-circle-fill"></i>
+            </div>
+          </div>
+<!--          <i class="bi bi-chevron-right kpi-arrow"></i>-->
+        </div>
+      </a>
+    </div>
+
+    <!-- SLA Vencido -->
+    <div class="col-6 col-md-3">
+      <a th:href="@{/tickets(filtro='VENCIDO')}" class="kpi-link">
+        <div class="kpi-card kpi-vencido">
+          <div class="d-flex align-items-start justify-content-between">
+            <div>
+              <div class="kpi-label">Vencidos</div>
+              <div class="kpi-number num-red" th:text="${stats.vencidos}">0</div>
+            </div>
+            <div class="kpi-icon kpi-icon-red">
+              <i class="bi bi-exclamation-octagon-fill"></i>
+            </div>
+          </div>
+<!--          <i class="bi bi-chevron-right kpi-arrow"></i>-->
+        </div>
+      </a>
     </div>
 
   </div>
-
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-```

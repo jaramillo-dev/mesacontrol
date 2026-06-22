@@ -13,6 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.biometec.mesacontrol.entity.Rol;
 
 /**
  * Controlador MVC para la gestión de usuarios mediante plantillas Thymeleaf.
@@ -37,6 +38,8 @@ public class UsuarioController {
 
     private final UsuarioService usuarioService;
     private final UsuarioMapper usuarioMapper;
+    @ModelAttribute("roles")
+    public Rol[] roles() {return Rol.values();}
 
     // ========================
     // LISTADO
@@ -47,7 +50,7 @@ public class UsuarioController {
      *
      * @param pageable configuración de paginación inyectada por Spring
      * @param model    modelo para inyectar datos a la vista Thymeleaf
-     * @return nombre de la plantilla Thymeleaf (templates/usuarios/listar.html)
+     * @return nombre de la plantilla Thymeleaf (templates/usuarios/listar-ticket.html)
      */
     @GetMapping
     public String listarTodos(
@@ -56,7 +59,7 @@ public class UsuarioController {
 
         UsuarioPageResponseDTO pagina = usuarioService.listarTodos(pageable);
         model.addAttribute("pagina", pagina);
-        return "usuarios/listar";
+        return "usuarios/listar-usuario";
     }
 
     // ========================
@@ -71,8 +74,11 @@ public class UsuarioController {
      */
     @GetMapping("/nuevo")
     public String mostrarFormularioCrear(Model model) {
+
         model.addAttribute("usuarioRequest", new UsuarioRequestDTO());
-        model.addAttribute("modoEdicion", false);
+
+        model.addAttribute("modoEdicion",false);
+
         return "usuarios/formulario-usuario";
     }
 
@@ -86,25 +92,32 @@ public class UsuarioController {
      * @return redirección al listado o recarga del formulario si hay errores
      */
     @PostMapping("/nuevo")
-    public String procesarCreacion(
-            @Validated(OnCreate.class) @ModelAttribute("usuarioRequest") UsuarioRequestDTO dto,
+    public String procesarCreacion(@Validated(OnCreate.class) @ModelAttribute("usuarioRequest") UsuarioRequestDTO dto,
             BindingResult result,
             RedirectAttributes redirectAttributes,
             Model model) {
 
         if (result.hasErrors()) {
-            model.addAttribute("modoEdicion", false);
+
+            model.addAttribute("modoEdicion",false);
+
             return "usuarios/formulario-usuario";
         }
 
         try {
+
             usuarioService.crearUsuario(dto);
-            redirectAttributes.addFlashAttribute("mensajeExito", "Usuario creado correctamente.");
+
+            redirectAttributes.addFlashAttribute("mensajeExito","Usuario creado correctamente.");
+
             return "redirect:/usuarios";
+
         } catch (IllegalArgumentException e) {
-            // Captura errores de negocio (ej. email duplicado)
-            result.rejectValue("email", "error.usuario", e.getMessage());
-            model.addAttribute("modoEdicion", false);
+
+            result.rejectValue("email","error.usuario", e.getMessage());
+
+            model.addAttribute("modoEdicion",false);
+
             return "usuarios/formulario-usuario";
         }
     }
@@ -122,12 +135,16 @@ public class UsuarioController {
      */
     @GetMapping("/{id}/editar")
     public String mostrarFormularioEditar(@PathVariable Long id, Model model) {
+
         UsuarioResponseDTO usuario = usuarioService.obtenerPorId(id);
+
         UsuarioRequestDTO dto = usuarioMapper.toRequestDTOFromResponse(usuario);
 
         model.addAttribute("usuarioRequest", dto);
-        model.addAttribute("usuarioId", id);
-        model.addAttribute("modoEdicion", true);
+
+        model.addAttribute("usuarioId",id);
+
+        model.addAttribute("modoEdicion",true);
 
         return "usuarios/formulario-usuario";
     }
@@ -145,7 +162,8 @@ public class UsuarioController {
     @PostMapping("/{id}/editar")
     public String procesarEdicion(
             @PathVariable Long id,
-            @Validated(OnUpdate.class) @ModelAttribute("usuarioRequest") UsuarioRequestDTO dto,
+            @Validated(OnUpdate.class)
+            @ModelAttribute("usuarioRequest") UsuarioRequestDTO dto,
             BindingResult result,
             RedirectAttributes redirectAttributes,
             Model model) {
@@ -153,17 +171,28 @@ public class UsuarioController {
         if (result.hasErrors()) {
             model.addAttribute("usuarioId", id);
             model.addAttribute("modoEdicion", true);
+
             return "usuarios/formulario-usuario";
         }
 
         try {
             usuarioService.editarUsuario(id, dto);
-            redirectAttributes.addFlashAttribute("mensajeExito", "Usuario actualizado correctamente.");
+
+            redirectAttributes.addFlashAttribute(
+                    "mensajeExito",
+                    "Usuario actualizado correctamente.");
+
             return "redirect:/usuarios";
+
         } catch (IllegalArgumentException e) {
-            result.rejectValue("email", "error.usuario", e.getMessage());
+            result.rejectValue(
+                    "email",
+                    "error.usuario",
+                    e.getMessage());
+
             model.addAttribute("usuarioId", id);
             model.addAttribute("modoEdicion", true);
+
             return "usuarios/formulario-usuario";
         }
     }

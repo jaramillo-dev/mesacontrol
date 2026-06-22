@@ -30,7 +30,8 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
  *   <li>Cifrado de contraseñas con BCrypt (factor de costo por defecto: 10)</li>
  *   <li>Formulario de login personalizado con redirección post-autenticación</li>
  *   <li>Gestión de sesiones con límite de una sesión concurrente por usuario</li>
- *   <li>Manejo de errores 401 y 403 con redirección a vistas Thymeleaf</li>
+ *   <li>* Manejo de errores 403 con vistas Thymeleaf personalizadas</li>
+ *   <li>Redirección automática al formulario de login para usuarios no autenticados</li>
  * </ul>
  *
  * <p>La autorización por método ({@code @PreAuthorize}, {@code @Secured}) está
@@ -123,8 +124,8 @@ public class SecurityConfig {
                         // Nota: /error/401 debe estar en el permitAll() de arriba;
                         // de lo contrario Spring Security lo interceptaría y
                         // generaría un bucle infinito de redirecciones.
-                        .authenticationEntryPoint((request, response, authException) ->
-                                response.sendRedirect("/error/401"))
+//                        .authenticationEntryPoint((request, response, authException) ->
+//                                response.sendRedirect("/error/401"))
 
                         // 403 — Acceso denegado: el usuario está autenticado pero
                         // su rol no tiene permiso para el recurso solicitado.

@@ -12,8 +12,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Pruebas unitarias ultrarrápidas para la red de seguridad del sistema.
- * Valida que los errores no controlados no expongan código al usuario.
+ * Pruebas unitarias rápidas para la red de seguridad del sistema.
+ * Válida que los errores no controlados no expongan código al usuario.
  */
 class GlobalExceptionHandlerTest {
 
@@ -22,7 +22,7 @@ class GlobalExceptionHandlerTest {
     @BeforeEach
     void setUp() {
         // Configuramos MockMvc de forma aislada (Standalone).
-        // Le inyectamos nuestro DummyController y nuestro manejador de excepciones real.
+        // Se inyecta el DummyController y el manejador de excepciones real.
         // Esto ejecuta la prueba en milisegundos sin levantar el contexto de Spring.
         mockMvc = MockMvcBuilders.standaloneSetup(new DummyController())
                 .setControllerAdvice(new GlobalExceptionHandler())
@@ -39,7 +39,7 @@ class GlobalExceptionHandlerTest {
 
         mockMvc.perform(get("/forzar-falla-catastrofica"))
                 .andExpect(status().isInternalServerError()) // Esperamos HTTP 500
-                .andExpect(view().name("error/manejador-global")) // Esperamos tu plantilla unificada
+                .andExpect(view().name("error/manejador-global"))
                 .andExpect(model().attribute("codigo", 500))
                 .andExpect(model().attribute("titulo", "Error inesperado"))
                 // Validamos que el mensaje es el genérico y no el mensaje real de la excepción

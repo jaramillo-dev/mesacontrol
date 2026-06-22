@@ -18,6 +18,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.ArgumentMatchers.any;
@@ -83,7 +85,7 @@ class UsuarioControllerSecurityTest {
     void listarTodos_RolAdmin_DebePermitirAcceso() throws Exception {
 
         // 1. Preparamos datos ficticios para el contenido de la página
-        java.util.List<UsuarioResponseDTO> usuariosFake = java.util.List.of(
+        List<UsuarioResponseDTO> usuariosFake = List.of(
                 new UsuarioResponseDTO(
                         1L,
                         "Juan Admin",
@@ -94,8 +96,6 @@ class UsuarioControllerSecurityTest {
         );
 
         // 2. Crear el DTO de paginación real para que Thymeleaf no reciba un null.
-        // Ajusta el orden de los parámetros según el constructor de tu registro/clase UsuarioPageResponseDTO:
-        // (contenido, paginaActual, tamanoPagina, totalElementos, totalPaginas, primera, ultima)
         UsuarioPageResponseDTO mockPagina =
                 new UsuarioPageResponseDTO(
                         usuariosFake, // contenido
@@ -112,7 +112,7 @@ class UsuarioControllerSecurityTest {
         // 4. Ejecutamos la petición
         mockMvc.perform(get("/usuarios"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("usuarios/listar")) // Asegura que va al template correcto
+                .andExpect(view().name("usuarios/listar-usuario")) // Asegura que va al template correcto
                 .andExpect(model().attributeExists("pagina")); // Verifica que el modelo lleva los datos de paginación
     }
 

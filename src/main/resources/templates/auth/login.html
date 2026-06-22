@@ -2,61 +2,123 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Mesa de Control - Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --app-bg: #f5f7fb;
+            --app-card: #ffffff;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            background-color: var(--app-bg);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #334155;
+        }
+
+        /* Tarjeta moderna flotante centralizada */
+        .card {
+            border-radius: var(--radius-lg) !important;
+            border: none !important;
+        }
+
+        /* Inputs, botones y complementos con bordes suavizados y transiciones */
+        .btn, .form-control, .input-group-text {
+            border-radius: var(--radius-md) !important;
+            transition: var(--transition-smooth);
+        }
+
+        /* Foco premium iluminado para las cajas de texto */
+        .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+        }
+
+        .btn {
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Contenedor circular suave para el logotipo principal */
+        .brand-icon-wrapper {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+            background-color: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+        }
+    </style>
 </head>
-<body class="bg-light d-flex align-items-center justify-content-center vh-100">
+<body class="d-flex align-items-center justify-content-center vh-100">
 
-<div class="card shadow-sm" style="width: 100%; max-width: 400px;">
-    <div class="card-body p-4">
-        <div class="text-center mb-4">
-            <i class="bi bi-shield-lock-fill text-primary" style="font-size: 3rem;"></i>
-            <h3 class="mt-2 text-dark fw-bold">Mesa de Control</h3>
-            <p class="text-muted small">Inicie sesión para acceder al sistema</p>
+<div class="card shadow-sm" style="width: 100%; max-width: 420px;">
+    <div class="card-body p-4 p-md-5">
+
+        <div class="text-center mb-4 mt-2">
+            <div class="brand-icon-wrapper shadow-2xs mb-3">
+                <i class="bi bi-shield-lock-fill fs-2"></i>
+            </div>
+            <h3 class="text-dark fw-bold m-0" style="letter-spacing: -0.5px;">Mesa de Control</h3>
+            <p class="text-muted small mb-0 mt-1">Inicie sesión para acceder de forma segura al portal.</p>
         </div>
 
-        <div th:if="${param.error}" class="alert alert-danger d-flex align-items-center py-2" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            <div class="small">Correo o contraseña incorrectos.</div>
+        <div th:if="${param.error}" class="alert alert-danger border-0 bg-danger-subtle text-danger d-flex align-items-center rounded-3 py-2.5 px-3 mb-3 small fw-medium shadow-3xs" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2.5 fs-6 lh-1"></i>
+            <span>Correo o contraseña incorrectos.</span>
         </div>
 
-        <div th:if="${param.logout}" class="alert alert-success d-flex align-items-center py-2" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            <div class="small">Ha cerrado sesión correctamente.</div>
+        <div th:if="${param.logout}" class="alert alert-success border-0 bg-success-subtle text-success d-flex align-items-center rounded-3 py-2.5 px-3 mb-3 small fw-medium shadow-3xs" role="alert">
+            <i class="bi bi-check-circle-fill me-2.5 fs-6 lh-1"></i>
+            <span>Sesión cerrada correctamente.</span>
         </div>
 
-        <div th:if="${param.expired}" class="alert alert-warning d-flex align-items-center py-2" role="alert">
-            <i class="bi bi-clock-history me-2"></i>
-            <div class="small">Su sesión ha expirado o se abrió en otro dispositivo.</div>
+        <div th:if="${param.expired}" class="alert alert-warning border-0 bg-warning-subtle text-dark d-flex align-items-start rounded-3 py-2.5 px-3 mb-3 small fw-medium shadow-3xs" role="alert">
+            <i class="bi bi-clock-history me-2.5 fs-6 lh-1 mt-0.5 text-warning"></i>
+            <div class="lh-sm">Su sesión ha expirado o se abrió en otro dispositivo.</div>
         </div>
 
-        <form th:action="@{/login}" method="post">
+        <form th:action="@{/login}" method="post" class="mt-3">
+
             <div class="mb-3">
-                <label for="username" class="form-label small fw-bold">Correo Electrónico</label>
+                <label for="username" class="form-label fw-bold text-muted small text-uppercase mb-1.5" style="font-size: 0.725rem; letter-spacing: 0.3px;">Correo Electrónico</label>
                 <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-envelope text-muted"></i></span>
-                    <input type="email" id="username" name="username" class="form-control border-start-0"
-                           placeholder="" required autofocus>
+                    <span class="input-group-text bg-light text-muted border-end-0 px-3"><i class="bi bi-envelope-fill fs-6"></i></span>
+                    <input type="email" id="username" name="username"
+                           class="form-control border-start-0 px-3 py-2 text-dark bg-white"
+                           placeholder="nombre@empresa.com" required autofocus>
                 </div>
             </div>
 
             <div class="mb-4">
-                <label for="password" class="form-label small fw-bold">Contraseña</label>
+                <label for="password" class="form-label fw-bold text-muted small text-uppercase mb-1.5" style="font-size: 0.725rem; letter-spacing: 0.3px;">Contraseña</label>
                 <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-lock text-muted"></i></span>
-                    <input type="password" id="password" name="password" class="form-control border-start-0"
-                           placeholder="" required>
+                    <span class="input-group-text bg-light text-muted border-end-0 px-3"><i class="bi bi-lock-fill fs-6"></i></span>
+                    <input type="password" id="password" name="password"
+                           class="form-control border-start-0 px-3 py-2 text-dark bg-white"
+                           placeholder="••••••••" required>
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
-                <i class="bi bi-box-arrow-in-right me-2"></i>Ingresar
+            <button type="submit" class="btn btn-primary w-100 py-2.5 shadow-sm rounded-3 d-inline-flex align-items-center justify-content-center mt-1">
+                <i class="bi bi-box-arrow-in-right me-2 fs-5"></i>Ingresar a la Plataforma
             </button>
         </form>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
