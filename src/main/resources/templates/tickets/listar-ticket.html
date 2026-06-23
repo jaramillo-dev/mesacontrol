@@ -590,18 +590,20 @@
                 <tr th:if="${#lists.isEmpty(tickets.content)}">
                     <td colspan="7" style="padding: 0;">
                         <div class="empty-state">
-                            <i class="bi bi-folder-x"></i>
-                            <h5>No se encontraron tickets</h5>
-                            <p th:text="${filtroActivo != null or folioBusqueda != null}
+                            <i class="bi bi-folder-x" style="color: #cbd5e1;"></i>
+                            <h5 style="color: var(--text-primary); font-weight: 700;">No se encontraron tickets</h5>
+
+                            <p style="color: var(--text-secondary) !important; font-weight: 500; font-size: 0.85rem;"
+                               th:text="${filtroActivo != null or folioBusqueda != null}
                                     ? 'Ningún ticket coincide con los criterios de búsqueda o filtros activos.'
                                     : 'No existen solicitudes de servicio asignadas en esta bandeja.'">
                                 Mensaje informativo
                             </p>
+
                             <a th:if="${filtroActivo != null or folioBusqueda != null}"
                                th:href="@{/tickets}"
-                               class="btn-nuevo" style="margin: 0 auto; display: inline-flex;">
-                                <i class="bi bi-arrow-counterclockwise"></i>
-                                Restablecer bandeja
+                               class="btn btn-sm text-white d-inline-flex align-items-center justify-content-center px-3 py-1.5"
+                               style="background-color: var(--blue-main); border: 1px solid var(--blue-main); border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 600; margin: 0 auto; box-shadow: 0 2px 6px rgba(26,86,219,0.15); gap: 6px;">Restablecer bandeja
                             </a>
                         </div>
                     </td>
