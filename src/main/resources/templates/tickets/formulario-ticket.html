@@ -120,7 +120,7 @@
 
           <!-- Cliente (Hospital) -->
           <div class="col-12 border-top pt-3">
-            <label class="form-label fw-bold text-muted small text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.3px;">Cliente (Hospital) *</label>
+            <label class="form-label fw-bold text-muted small text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.3px;">Unidad Médica *</label>
             <select class="form-select px-3 py-2 fw-medium text-dark" th:field="*{clienteId}" id="clienteId" th:classappend="${#fields.hasErrors('clienteId')} ? 'is-invalid'">
               <option value="">Seleccione un cliente...</option>
               <option th:each="cliente : ${clientes}" th:value="${cliente.id}" th:text="${cliente.nombre}"></option>

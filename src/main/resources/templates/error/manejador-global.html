@@ -88,15 +88,12 @@
                     <h1 class="display-5 fw-bold text-dark mb-2" th:text="${codigo}">500</h1>
                     <h4 class="fw-bold text-secondary mb-3" th:text="${titulo}">Título del Error</h4>
 
-                    <p class="text-muted mb-4 px-3" th:text="${mensaje}">
-                        Descripción detallada provista por el GlobalExceptionHandler o ErrorController.
+                    <p class="text-muted mb-2 small fw-medium">
+                        <i class="bi bi-info-circle-fill me-1"></i> Detalle del inconveniente:
                     </p>
-
-                    <div class="alert bg-light border text-start rounded-3 py-2 px-3 mb-4 d-inline-block mx-auto" th:if="${ruta != null}">
-                        <p class="text-muted small m-0 fw-medium">
-                            <i class="bi bi-link-45deg text-primary me-1 fs-6 align-middle"></i>
-                            <span class="align-middle">Ruta afectada:</span>
-                            <code class="text-dark fw-bold ms-1 align-middle" th:text="${ruta}">/ruta</code>
+                    <div class="p-3 bg-light rounded-3 border text-start mb-4">
+                        <p class="mb-0 small font-monospace text-secondary lh-base">
+                            <span th:text="${mensaje}">Error interno del sistema</span>
                         </p>
                     </div>
 

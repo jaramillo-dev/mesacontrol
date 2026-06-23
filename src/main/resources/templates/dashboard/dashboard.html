@@ -252,6 +252,30 @@
     </a>
   </div>
 
+  <div class="mb-3 mt-1 d-flex align-items-center justify-content-between">
+
+    <div class="d-flex align-items-center">
+      <h5 class="fw-bold text-dark mb-0" style="letter-spacing: -0.3px; font-size: 1.1rem;">
+        Resumen Operativo de Tickets
+      </h5>
+
+      <i class="bi bi-info-circle-fill text-muted ms-2"
+         data-bs-toggle="tooltip"
+         data-bs-html="true"
+         data-bs-placement="right"
+         title="Monitorea el volumen y estado de tus tickets asignados.<br>Los tickets en estado <b>Vencido</b> requieren tu atención inmediata."
+         style="cursor: pointer; font-size: 0.95rem; transition: color 0.2s ease;"
+         onmouseover="this.classList.replace('text-muted', 'text-primary')"
+         onmouseout="this.classList.replace('text-primary', 'text-muted')">
+      </i>
+    </div>
+
+    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1 rounded-2" style="font-size: 0.65rem; font-weight: 600;">
+    <i class="bi bi-broadcast me-1"></i>En tiempo real
+  </span>
+
+  </div>
+
   <!-- KPI Cards -->
   <div class="row g-3 mb-4">
 
@@ -331,5 +355,14 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Inicializador nativo de Tooltips de Bootstrap 5
+  document.addEventListener("DOMContentLoaded", function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+</script>
 </body>
 </html>
