@@ -404,41 +404,18 @@
         .pag-info strong { color: var(--text-primary); }
 
         /* ── Mobile: cards bajo 640px ── */
+        /* ── Mobile ── */
         @media (max-width: 640px) {
-            .table-scroll { max-height: none; overflow: visible; }
-            .data-table, .data-table thead, .data-table tbody,
-            .data-table tr, .data-table td { display: block; width: 100%; }
-            .data-table thead { display: none; }
-            .data-table tbody tr {
-                border: 1px solid var(--border-color);
-                border-radius: var(--radius-md);
-                margin: 0 1rem 0.75rem;
-                width: calc(100% - 2rem);
-                background: #fff;
-                padding: 0.75rem 0;
-            }
-            .data-table tbody tr:hover { background: #fff; }
-            .data-table tbody td {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 7px 14px;
-                border-bottom: 1px solid #f3f4f6;
-                white-space: normal;
-            }
-            .data-table tbody td:last-child { border-bottom: none; }
-            .data-table tbody td::before {
-                content: attr(data-label);
-                font-size: 0.7rem;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 0.4px;
-                color: var(--text-muted);
-                flex-shrink: 0;
-                margin-right: 10px;
-            }
-            .cell-unidad { max-width: 160px; }
-            .page-header { padding: 1.25rem; }
+            .page-header { padding: 1.1rem 1.25rem; }
+            .page-header h2 { font-size: 1.2rem; }
+            .data-table tbody td { padding: 10px 12px; }
+
+            /* Ajuste del buscador para que no se aplaste en móviles */
+            .search-wrap .input-group { flex-wrap: wrap; height: auto; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-color); }
+            .search-wrap .form-select, .search-wrap .form-control { border: none !important; max-width: 100% !important; flex: 1 1 100%; height: 42px;}
+            .search-wrap .form-select { border-bottom: 1px solid var(--border-color) !important; }
+            .search-wrap .btn-search { width: 100%; border-radius: 0; height: 42px; }
+            .search-wrap .btn-clear { height: 42px; border: none; border-bottom: 1px solid var(--border-color); }
         }
     </style>
 </head>

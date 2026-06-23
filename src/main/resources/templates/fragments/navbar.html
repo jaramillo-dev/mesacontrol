@@ -4,11 +4,10 @@
 
 <nav class="navbar navbar-expand-lg sticky-top"
      th:fragment="navbar(paginaActual)"
-     style="background-color: #ffffff; border-bottom: 1px solid #e8eaed; padding: 0 1.25rem; height: 60px;">
+     style="background-color: #ffffff; border-bottom: 1px solid #e8eaed; padding: 0.5rem 1.25rem; min-height: 60px;">
 
     <div class="container-fluid px-0">
 
-        <!-- Brand -->
         <a class="navbar-brand fw-bold d-flex align-items-center gap-2 text-decoration-none"
            th:href="@{/dashboard}"
            style="letter-spacing: -0.4px; color: #111827;">
@@ -18,7 +17,6 @@
             <span style="font-size: 0.95rem; font-weight: 600; color: #111827; font-family: 'Segoe UI', system-ui, sans-serif;">Mesa de Control</span>
         </a>
 
-        <!-- Toggler mobile -->
         <button class="navbar-toggler border-0 shadow-none p-1" type="button"
                 data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"
@@ -26,12 +24,10 @@
             <i class="bi bi-list fs-4"></i>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="collapse navbar-collapse bg-white pb-3 pb-lg-0" id="navbarNav">
 
-            <!-- Nav links -->
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-1">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-1 pt-2 pt-lg-0">
 
-                <!-- Dashboard inactivo -->
                 <li class="nav-item" th:if="${paginaActual != 'dashboard'}">
                     <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2"
                        th:href="@{/dashboard}"
@@ -41,7 +37,6 @@
                         <i class="bi bi-grid-1x2" style="font-size: 0.85rem;"></i>Dashboard
                     </a>
                 </li>
-                <!-- Dashboard activo -->
                 <li class="nav-item" th:if="${paginaActual == 'dashboard'}">
                     <span class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2"
                           style="font-size: 0.875rem; font-weight: 600; color: #1a56db; background: #eff6ff; cursor: default;">
@@ -49,7 +44,6 @@
                     </span>
                 </li>
 
-                <!-- Tickets inactivo -->
                 <li class="nav-item" th:if="${paginaActual != 'tickets'}">
                     <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2"
                        th:href="@{/tickets}"
@@ -59,7 +53,6 @@
                         <i class="bi bi-ticket-detailed" style="font-size: 0.85rem;"></i>Tickets
                     </a>
                 </li>
-                <!-- Tickets activo -->
                 <li class="nav-item" th:if="${paginaActual == 'tickets'}">
                     <span class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2"
                           style="font-size: 0.875rem; font-weight: 600; color: #1a56db; background: #eff6ff; cursor: default;">
@@ -67,7 +60,6 @@
                     </span>
                 </li>
 
-                <!-- Usuarios inactivo (solo ADMIN) -->
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')" th:if="${paginaActual != 'usuarios'}">
                     <a class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2"
                        th:href="@{/usuarios}"
@@ -77,7 +69,6 @@
                         <i class="bi bi-people" style="font-size: 0.85rem;"></i>Usuarios
                     </a>
                 </li>
-                <!-- Usuarios activo (solo ADMIN) -->
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')" th:if="${paginaActual == 'usuarios'}">
                     <span class="nav-link d-flex align-items-center gap-2 px-3 py-2 rounded-2"
                           style="font-size: 0.875rem; font-weight: 600; color: #1a56db; background: #eff6ff; cursor: default;">
@@ -87,24 +78,22 @@
 
             </ul>
 
-            <!-- Zona derecha: usuario + logout -->
-            <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+            <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 mt-3 mt-lg-0 border-top pt-3 pt-lg-0 border-lg-0">
 
-                <!-- Chip de usuario -->
                 <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-2"
                      style="background: #f9fafb; border: 1px solid #e5e7eb;">
                     <div style="width: 28px; height: 28px; border-radius: 50%; background: #dbeafe; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                         <i class="bi bi-person-fill" style="font-size: 0.8rem; color: #1a56db;"></i>
                     </div>
-                    <div style="line-height: 1.2;">
-                        <div style="font-size: 0.8rem; font-weight: 600; color: #111827;" th:text="${#authentication.name}">usuario</div>
+                    <div style="line-height: 1.2; overflow: hidden;">
+                        <div style="font-size: 0.8rem; font-weight: 600; color: #111827; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;" th:text="${#authentication.name}">usuario</div>
                         <div style="font-size: 0.7rem; color: #9ca3af;">Sesión activa</div>
                     </div>
                 </div>
 
-                <!-- Botón salir -->
                 <form th:action="@{/logout}" method="post" class="m-0">
                     <button type="submit"
+                            class="w-100 justify-content-center"
                             style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.8rem; font-weight: 500; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; cursor: pointer; transition: background 0.15s ease;"
                             onmouseover="this.style.background='#fee2e2'"
                             onmouseout="this.style.background='#fef2f2'">
