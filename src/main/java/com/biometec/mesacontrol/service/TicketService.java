@@ -257,24 +257,19 @@ public class TicketService {
      * Resuelve de forma unificada las combinaciones de filtros de la bandeja de entrada.
      */
     @Transactional(readOnly = true)
-    public Page<TicketResponseDTO> listarTicketsCombinados(String folio, String filtro, Usuario usuarioLogueado, Pageable pageable) {
+    public Page<TicketResponseDTO> listarTicketsCombinados(String folio, String filtro, boolean esVencido, Usuario usuarioLogueado, Pageable pageable) {
 
         Long responsableId = (usuarioLogueado.getRol() == Rol.ADMIN) ? null : usuarioLogueado.getId();
         TipoTicket tipo = (usuarioLogueado.getRol() == Rol.VENTAS) ? TipoTicket.VENTA :
                 (usuarioLogueado.getRol() == Rol.TECNICO) ? TipoTicket.SERVICIO : null;
 
         EstadoTicket estado = null;
-        boolean esVencido = false;
 
-        if (filtro != null) {
-            if ("VENCIDO".equalsIgnoreCase(filtro)) {
-                esVencido = true;
-            } else {
-                try {
-                    estado = EstadoTicket.valueOf(filtro);
-                } catch (IllegalArgumentException e) {
-                    // Evita quiebres si el string no coincide
-                }
+        if (filtro != null && !filtro.trim().isEmpty()) {
+            try {
+                estado = EstadoTicket.valueOf(filtro.trim().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Evita quiebres si el string no coincide
             }
         }
 

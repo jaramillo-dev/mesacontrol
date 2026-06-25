@@ -18,7 +18,7 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_DB: mesacontrol_db
+          POSTGRES_DB: mesacontrol_test
           POSTGRES_USER: admin_biometec
           POSTGRES_PASSWORD: admin_password
         ports:
@@ -42,7 +42,7 @@ jobs:
       - name: Build and Test with Maven
         # 3. Inyectamos las credenciales para que Spring Boot se conecte a la DB del CI
         env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/mesacontrol_db
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/mesacontrol_test
           SPRING_DATASOURCE_USERNAME: admin_biometec
           SPRING_DATASOURCE_PASSWORD: admin_password
         # 4. Quitamos el skipTests.

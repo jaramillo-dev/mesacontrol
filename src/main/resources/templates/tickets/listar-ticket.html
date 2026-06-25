@@ -458,17 +458,17 @@
     <!-- Barra de búsqueda + filtro activo -->
     <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
 
-        <form th:action="@{/tickets}" method="GET" class="search-wrap d-flex" style="min-width: 380px; max-width: 550px; flex: 1 1 380px;">
-            <div class="input-group" style="height: 38px;">
+        <form th:action="@{/tickets}" method="GET" class="search-wrap d-flex flex-wrap align-items-center w-100" style="max-width: 800px;">
+            <div class="input-group flex-nowrap" style="height: 38px; width: auto; flex: 1 1 380px;">
 
+                <!-- Select SÓLO de Estados del Ciclo de Vida -->
                 <select name="filtro" class="form-select border-end-0 shadow-none bg-light"
                         onchange="this.form.submit()"
-                        style="max-width: 130px; border-radius: var(--radius-md) 0 0 var(--radius-md); font-size: 0.85rem; border-color: var(--border-color);">
-                    <option value="">Todos</option>
+                        style="max-width: 145px; border-radius: var(--radius-md) 0 0 var(--radius-md); font-size: 0.85rem; border-color: var(--border-color);">
+                    <option value="">Todos los estados</option>
                     <option value="ABIERTO" th:selected="${filtroActivo == 'ABIERTO'}">Abiertos</option>
                     <option value="EN_PROCESO" th:selected="${filtroActivo == 'EN_PROCESO'}">En Proceso</option>
                     <option value="CERRADO" th:selected="${filtroActivo == 'CERRADO'}">Cerrados</option>
-                    <option value="VENCIDO" th:selected="${filtroActivo == 'VENCIDO'}">Vencidos</option>
                 </select>
 
                 <input type="text" name="folio"
@@ -477,16 +477,26 @@
                        placeholder="Buscar folio (TK-2026…)"
                        th:value="${folioBusqueda}">
 
-                <a th:if="${(folioBusqueda != null and !#strings.isEmpty(folioBusqueda)) or (filtroActivo != null and !#strings.isEmpty(filtroActivo))}"
+                <a th:if="${(folioBusqueda != null and !#strings.isEmpty(folioBusqueda)) or (filtroActivo != null and !#strings.isEmpty(filtroActivo)) or soloVencidos}"
                    th:href="@{/tickets}"
                    class="btn-clear border"
                    title="Limpiar filtros">
                     <i class="bi bi-x-lg"></i>
                 </a>
 
-                <button type="submit" class="btn-search border-0">
+                <button type="submit" class="btn-search border-0" style="border-radius: 0 var(--radius-md) var(--radius-md) 0;">
                     <i class="bi bi-search"></i>
                 </button>
+            </div>
+
+            <!-- Toggle Switch de SLA Vencido (Independiente) -->
+            <div class="form-check form-switch ms-md-3 mt-3 mt-md-0 mb-0 d-flex align-items-center">
+                <input class="form-check-input" type="checkbox" role="switch" id="switchVencidos"
+                       name="vencido" value="true" th:checked="${soloVencidos}" onchange="this.form.submit()"
+                       style="cursor: pointer; width: 2.5em; height: 1.25em;">
+                <label class="form-check-label ms-2 fw-bold text-danger" for="switchVencidos" style="font-size: 0.85rem; cursor: pointer; white-space: nowrap;">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Solo Vencidos
+                </label>
             </div>
         </form>
     </div>
@@ -502,6 +512,7 @@
                     <th>Tipo</th>
                     <th>Prioridad</th>
                     <th>Estado</th>
+                    <th>Fecha Creación</th>
                     <th>Unidad Médica</th>
                     <th>Vencimiento</th>
                     <!--                    <th style="text-align: right; padding-right: 20px;">Acciones</th>-->
@@ -531,9 +542,25 @@
                         <span class="tag tag-prioridad" th:text="${ticket.prioridad.descripcion}">ALTA</span>
                     </td>
 
-                    <!-- Estado – sin color, solo texto -->
+                    <!-- Estado – Doble etiquetado para clarificar Urgencia -->
                     <td data-label="Estado">
                         <span class="tag tag-estado" th:text="${ticket.estado.descripcion}">EN PROCESO</span>
+
+                        <!-- Mini Alerta visual si está vencido y NO está cerrado -->
+                        <span th:if="${ticket.slaSemaforo == 'ROJO' and ticket.estado.name() != 'CERRADO'}"
+                              class="badge bg-danger rounded-circle ms-1 shadow-sm"
+                              title="El tiempo límite de atención se ha agotado"
+                              style="font-size: 0.6rem; padding: 4px; vertical-align: text-top;">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </span>
+                    </td>
+
+                    <!-- Fecha de creación del Ticket -->
+                    <td data-label="Fecha Creación">
+                        <span style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary);"
+                              th:text="${#temporals.format(ticket.fechaCreacion, 'dd/MM/yyyy HH:mm')}">
+                            01/01/2026 12:00
+                        </span>
                     </td>
 
                     <!-- Unidad médica con tooltip -->
@@ -600,7 +627,7 @@
                                 Mensaje informativo
                             </p>
 
-                            <a th:if="${filtroActivo != null or folioBusqueda != null}"
+                            <a th:if="${filtroActivo != null or folioBusqueda != null or soloVencidos}"
                                th:href="@{/tickets}"
                                class="btn btn-sm text-white d-inline-flex align-items-center justify-content-center px-3 py-1.5"
                                style="background-color: var(--blue-main); border: 1px solid var(--blue-main); border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 600; margin: 0 auto; box-shadow: 0 2px 6px rgba(26,86,219,0.15); gap: 6px;">Restablecer bandeja
@@ -625,14 +652,14 @@
             <ul class="pagination pagination-sm mb-0 gap-2">
                 <li class="page-item" th:classappend="${tickets.first} ? 'disabled'">
                     <a class="page-link border rounded-3 px-3 py-1.5 fw-medium text-secondary shadow-sm"
-                       th:href="@{/tickets(page=${tickets.number - 1}, folio=${folioBusqueda}, filtro=${filtroActivo})}">
+                       th:href="@{/tickets(page=${tickets.number - 1}, folio=${folioBusqueda}, filtro=${filtroActivo}, vencido=${soloVencidos})}">
                         <i class="bi bi-chevron-left me-1 small"></i> Anterior
                     </a>
                 </li>
 
                 <li class="page-item" th:classappend="${tickets.last} ? 'disabled'">
                     <a class="page-link border rounded-3 px-3 py-1.5 fw-medium text-secondary shadow-sm"
-                       th:href="@{/tickets(page=${tickets.number + 1}, folio=${folioBusqueda}, filtro=${filtroActivo})}">
+                       th:href="@{/tickets(page=${tickets.number + 1}, folio=${folioBusqueda}, filtro=${filtroActivo}, vencido=${soloVencidos})}">
                         Siguiente <i class="bi bi-chevron-right ms-1 small"></i>
                     </a>
                 </li>

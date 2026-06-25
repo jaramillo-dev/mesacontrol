@@ -225,8 +225,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
      * Obtiene una página de tickets activos pertenecientes a un área específica
      * y asignados a un usuario responsable en particular.
      * <p>
-     * Se ordena prioritariamente por el nivel de urgencia de la prioridad (ASC)
-     * y secundariamente por la antigüedad de la fecha de creación (ASC).
+     * Se ordena por la fecha de creación de forma descendente (los más recientes primero).
      * </p>
      *
      * @param tipo el tipo de ticket que corresponde al área (VENTA o SERVICIO)
@@ -234,7 +233,7 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
      * @param pageable información de paginación de Spring Data
      * @return página con los tickets que cumplen estrictamente con ambos criterios
      */
-    @Query("SELECT t FROM Ticket t WHERE t.tipo = :tipo AND t.responsable.id = :responsableId AND t.estado IN :estados ORDER BY t.prioridad ASC, t.fechaCreacion ASC")
+    @Query("SELECT t FROM Ticket t WHERE t.tipo = :tipo AND t.responsable.id = :responsableId AND t.estado IN :estados ORDER BY t.fechaCreacion DESC")
     Page<Ticket> findByTipoAndResponsableAndEstados(
             @Param("tipo") TipoTicket tipo,
             @Param("responsableId") Long responsableId,
@@ -285,11 +284,11 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
      * </p>
      */
     @Query("""
-        SELECT t FROM Ticket t 
-        WHERE t.estado = :estado 
-          AND (:tipo IS NULL OR t.tipo = :tipo) 
-          AND (:responsableId IS NULL OR t.responsable.id = :responsableId) 
-        ORDER BY t.prioridad ASC, t.fechaCreacion ASC
+    SELECT t FROM Ticket t 
+    WHERE t.estado = :estado 
+      AND (:tipo IS NULL OR t.tipo = :tipo) 
+      AND (:responsableId IS NULL OR t.responsable.id = :responsableId) 
+    ORDER BY t.fechaCreacion DESC
     """)
     Page<Ticket> findPorEstadoRolYResponsable(
             @Param("estado") EstadoTicket estado,
@@ -322,16 +321,14 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     /**
      * Consulta Maestra Dinámica: Combina Búsqueda por Folio, Estado y Paginación simultáneamente.
      */
-    // EN TicketRepository.java
-
     @Query("""
     SELECT t FROM Ticket t 
     WHERE (CAST(:folio AS string) IS NULL OR UPPER(t.folio) LIKE :folio)
-      AND (:estado IS NULL OR t.estado = :estado)
-      AND (:tipo IS NULL OR t.tipo = :tipo)
-      AND (:responsableId IS NULL OR t.responsable.id = :responsableId)
-      AND (:esVencido = false OR (t.fechaVencimientoSla < CURRENT_TIMESTAMP AND t.estado <> com.biometec.mesacontrol.entity.EstadoTicket.CERRADO))
-    ORDER BY t.prioridad ASC, t.fechaCreacion ASC
+    AND (:estado IS NULL OR t.estado = :estado)
+    AND (:tipo IS NULL OR t.tipo = :tipo)
+    AND (:responsableId IS NULL OR t.responsable.id = :responsableId)
+    AND (:esVencido = false OR (t.fechaVencimientoSla < CURRENT_TIMESTAMP AND t.estado <> com.biometec.mesacontrol.entity.EstadoTicket.CERRADO))
+    ORDER BY t.fechaCreacion DESC
     """)
     Page<Ticket> findTicketsCombinados(
             @Param("folio") String folio,

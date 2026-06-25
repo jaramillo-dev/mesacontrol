@@ -374,11 +374,12 @@ class TicketServiceTest {
         TicketResponseDTO dto = construirRespuestaTicket(ticket);
         Page<Ticket> pagina = new PageImpl<>(List.of(ticket), pageable, 1);
 
+        // Mantenemos false en el repositorio ya que no se solicita buscar vencidos
         when(ticketRepository.findTicketsCombinados("%TK%", EstadoTicket.ABIERTO, null, null, false, pageable)).thenReturn(pagina);
         when(ticketMapper.toResponseDTO(ticket)).thenReturn(dto);
 
-        // Act
-        Page<TicketResponseDTO> resultado = ticketService.listarTicketsCombinados("tk", "ABIERTO", usuario, pageable);
+        // Act -> CORRECCIÓN: Se añade el argumento 'false' antes del usuario logueado
+        Page<TicketResponseDTO> resultado = ticketService.listarTicketsCombinados("tk", "ABIERTO", false, usuario, pageable);
 
         // Assert
         assertThat(resultado.getContent()).containsExactly(dto);
@@ -395,11 +396,12 @@ class TicketServiceTest {
         TicketResponseDTO dto = construirRespuestaTicket(ticket);
         Page<Ticket> pagina = new PageImpl<>(List.of(ticket), pageable, 1);
 
+        // El repositorio espera true en el flag de vencimiento
         when(ticketRepository.findTicketsCombinados(null, null, TipoTicket.VENTA, 18L, true, pageable)).thenReturn(pagina);
         when(ticketMapper.toResponseDTO(ticket)).thenReturn(dto);
 
-        // Act
-        Page<TicketResponseDTO> resultado = ticketService.listarTicketsCombinados(null, "VENCIDO", usuario, pageable);
+        // Act -> CORRECCIÓN: El segundo parámetro pasa a ser 'null' (o cadena vacía) y activamos el flag con 'true'
+        Page<TicketResponseDTO> resultado = ticketService.listarTicketsCombinados(null, null, true, usuario, pageable);
 
         // Assert
         assertThat(resultado.getContent()).containsExactly(dto);

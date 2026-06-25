@@ -83,28 +83,30 @@ public class TicketController {
      * @param filtro estado utilizado para filtrar los resultados; opcional
      * @param model modelo utilizado para exponer los resultados a la vista
      * @param principal usuario autenticado que realiza la consulta
+     * @param vencido identifica si la fecha de atención venció
      * @param pageable configuración de paginación y ordenamiento
      * @return la vista de listado de tickets
      */
     @GetMapping
     public String listarTickets(@RequestParam(value = "folio", required = false) String folio,
                                 @RequestParam(value = "filtro", required = false) String filtro,
+                                @RequestParam(value = "vencido", required = false, defaultValue = "false") boolean vencido,
                                 Model model, Principal principal,
                                 @PageableDefault(size = 10) Pageable pageable) {
 
         Usuario usuarioLogueado = usuarioRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new IllegalStateException("Usuario no encontrado"));
 
-        // NORMALIZACIÓN DE RAÍZ: Si el formulario envía el texto vacío, lo volvemos un null real de Java
         String folioParam = (folio != null && !folio.trim().isEmpty()) ? folio.trim() : null;
         String filtroParam = (filtro != null && !filtro.trim().isEmpty()) ? filtro.trim().toUpperCase() : null;
 
-        // Llamamos al método combinador del servicio pasando los parámetros limpios
-        Page<TicketResponseDTO> tickets = ticketService.listarTicketsCombinados(folioParam, filtroParam, usuarioLogueado, pageable);
+        // Llamamos al motor de búsqueda combinada enviando el flag de vencimiento
+        Page<TicketResponseDTO> tickets = ticketService.listarTicketsCombinados(folioParam, filtroParam, vencido, usuarioLogueado, pageable);
 
         model.addAttribute("tickets", tickets);
         model.addAttribute("folioBusqueda", folioParam);
         model.addAttribute("filtroActivo", filtroParam);
+        model.addAttribute("soloVencidos", vencido);
 
         return "tickets/listar-ticket";
     }
@@ -127,7 +129,6 @@ public class TicketController {
      * @param folio identificador único visible para el usuario
      * @param model modelo utilizado para exponer la información del ticket y sus comentarios
      * @return la vista de detalle del ticket
-     * @throws com.mesacontrol.exception.ResourceNotFoundException si el folio no existe
      */
     @GetMapping("/{folio}")
     public String verDetalleTicket(@PathVariable String folio, Model model) {

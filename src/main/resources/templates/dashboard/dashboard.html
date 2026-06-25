@@ -263,10 +263,7 @@
          data-bs-toggle="tooltip"
          data-bs-html="true"
          data-bs-placement="right"
-         title="Monitorea el volumen y estado de tus tickets asignados.<br>Los tickets en estado <b>Vencido</b> requieren tu atención inmediata."
-         style="cursor: pointer; font-size: 0.95rem; transition: color 0.2s ease;"
-         onmouseover="this.classList.replace('text-muted', 'text-primary')"
-         onmouseout="this.classList.replace('text-primary', 'text-muted')">
+         title="Monitorea el volumen y el ciclo de vida de los tickets.<br>Los tickets <b>Vencidos</b> han superado su tiempo límite y requieren atención prioritaria.">
       </i>
     </div>
 
@@ -277,10 +274,33 @@
   </div>
 
   <!-- KPI Cards -->
+  <div class="alert d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 border-0 shadow-sm mb-4 py-3 px-4"
+       style="background-color: #fef2f2; border-radius: var(--radius-lg); border-left: 5px solid #dc2626 !important;"
+       th:if="${stats.vencidos > 0}">
+
+    <div class="d-flex align-items-center gap-3">
+      <div class="bg-white text-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 42px; height: 42px;">
+        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+      </div>
+      <div>
+        <h6 class="mb-1 fw-bold" style="color: #991b1b; font-size: 0.95rem;">Atención Requerida</h6>
+
+        <p class="mb-0 fw-medium" style="color: #b91c1c; font-size: 0.825rem;">
+          Tienes <strong class="fs-6" th:text="${stats.vencidos}">1</strong>
+          <span th:text="${stats.vencidos == 1 ? 'ticket que ha superado' : 'tickets que han superado'}">tickets que han superado</span>
+          su tiempo límite de atención.
+        </p>
+      </div>
+    </div>
+
+    <a th:href="@{/tickets(vencido=true)}" class="btn btn-danger fw-semibold shadow-sm px-4 py-2 text-nowrap" style="border-radius: var(--radius-md); font-size: 0.85rem;">
+      Ver <span th:text="${stats.vencidos == 1 ? 'ticket vencido' : 'tickets vencidos'}">tickets vencidos</span> <i class="bi bi-arrow-right ms-1"></i>
+    </a>
+  </div>
+
   <div class="row g-3 mb-4">
 
-    <!-- Abiertos -->
-    <div class="col-6 col-md-3">
+    <div class="col-12 col-md-4">
       <a th:href="@{/tickets(filtro='ABIERTO')}" class="kpi-link">
         <div class="kpi-card kpi-abierto">
           <div class="d-flex align-items-start justify-content-between">
@@ -292,13 +312,11 @@
               <i class="bi bi-envelope-open-fill"></i>
             </div>
           </div>
-<!--          <i class="bi bi-chevron-right kpi-arrow"></i>-->
         </div>
       </a>
     </div>
 
-    <!-- En proceso -->
-    <div class="col-6 col-md-3">
+    <div class="col-12 col-md-4">
       <a th:href="@{/tickets(filtro='EN_PROCESO')}" class="kpi-link">
         <div class="kpi-card kpi-proceso">
           <div class="d-flex align-items-start justify-content-between">
@@ -310,13 +328,11 @@
               <i class="bi bi-gear-wide-connected"></i>
             </div>
           </div>
-<!--          <i class="bi bi-chevron-right kpi-arrow"></i>-->
         </div>
       </a>
     </div>
 
-    <!-- Cerrados -->
-    <div class="col-6 col-md-3">
+    <div class="col-12 col-md-4">
       <a th:href="@{/tickets(filtro='CERRADO')}" class="kpi-link">
         <div class="kpi-card kpi-cerrado">
           <div class="d-flex align-items-start justify-content-between">
@@ -328,25 +344,6 @@
               <i class="bi bi-check-circle-fill"></i>
             </div>
           </div>
-<!--          <i class="bi bi-chevron-right kpi-arrow"></i>-->
-        </div>
-      </a>
-    </div>
-
-    <!-- SLA Vencido -->
-    <div class="col-6 col-md-3">
-      <a th:href="@{/tickets(filtro='VENCIDO')}" class="kpi-link">
-        <div class="kpi-card kpi-vencido">
-          <div class="d-flex align-items-start justify-content-between">
-            <div>
-              <div class="kpi-label">Vencidos</div>
-              <div class="kpi-number num-red" th:text="${stats.vencidos}">0</div>
-            </div>
-            <div class="kpi-icon kpi-icon-red">
-              <i class="bi bi-exclamation-octagon-fill"></i>
-            </div>
-          </div>
-<!--          <i class="bi bi-chevron-right kpi-arrow"></i>-->
         </div>
       </a>
     </div>
