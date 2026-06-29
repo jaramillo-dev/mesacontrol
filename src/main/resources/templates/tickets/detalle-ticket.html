@@ -546,12 +546,12 @@
 
                     <div class="row g-4 mb-3">
                         <div class="col-sm-6">
-                            <span class="info-label">Unidad IMSS</span>
+                            <span class="info-label">Unidad Médica</span>
                             <p class="info-value" th:text="${ticket.clienteNombre}">Hospital General de Zona</p>
                         </div>
                         <div class="col-sm-6">
-                            <span class="info-label">Equipo Médico Afectado</span>
-                            <p class="info-value-secondary" th:text="${ticket.equipoNombre + ' (S/N: ' + ticket.equipoNumeroSerie + ')'}">Ultrasonido (S/N: 987654)</p>
+                            <span class="info-label">Equipo Médico</span>
+                            <p class="info-value-secondary" th:text="${ticket.equipoNombre + ' (No. de serie: ' + ticket.equipoNumeroSerie + ')'}">Ultrasonido (No. de serie: 987654)</p>
                         </div>
                     </div>
 
@@ -627,7 +627,7 @@
 
                     <!-- Descripción -->
                     <div>
-                        <span class="info-label">Descripción Inicial del Problema</span>
+                        <span class="info-label">Descripción Inicial de la Solicitud</span>
                         <div class="desc-box" th:text="${ticket.descripcionInicial}">
                             Detalles del reporte de falla o requerimiento de venta ingresado inicialmente...
                         </div>
@@ -637,7 +637,7 @@
                     <div class="cierre-box mt-3" th:if="${ticket.estado.name() == 'CERRADO'}">
                         <h6><i class="bi bi-file-earmark-check-fill"></i>Documentación de Cierre Registrada</h6>
                         <p th:if="${ticket.folioCotizacion != null}">
-                            Folio de Cotización: <span class="mono" th:text="${ticket.folioCotizacion}"></span>
+                            Folio de Venta: <span class="mono" th:text="${ticket.folioCotizacion}"></span>
                         </p>
                         <p th:if="${ticket.folioOrdenServicio != null}">
                             Folio de Orden de Servicio: <span class="mono" th:text="${ticket.folioOrdenServicio}"></span>
@@ -677,7 +677,7 @@
                                     <span class="timeline-date" th:text="${#temporals.format(comentario.fechaCreacion, 'dd/MM/yyyy HH:mm')}">01/01/2026 12:00</span>
                                 </div>
                                 <div class="timeline-text" th:text="${comentario.texto}">
-                                    Contenido de la nota técnica...
+                                    Contenido de la nota interna...
                                 </div>
                             </div>
                         </div>
@@ -722,7 +722,7 @@
                         <span><strong>Atención:</strong> Esta acción es irreversible. El ticket pasará a histórico y se detendrá el contador de vencimiento.</span>
                     </div>
                     <label for="folioDocumento" class="modal-form-label"
-                           th:text="${ticket.tipo.name() == 'VENTA'} ? 'Ingrese Folio de Cotización Comercial *' : 'Ingrese Folio de Orden de Servicio (OS) *'"></label>
+                           th:text="${ticket.tipo.name() == 'VENTA'} ? 'Ingrese Folio de Venta *' : 'Ingrese Folio de Orden de Servicio *'"></label>
                     <input type="text" class="modal-form-input" id="folioDocumento" name="folioDocumento" required>
                 </div>
                 <div class="modal-footer">
