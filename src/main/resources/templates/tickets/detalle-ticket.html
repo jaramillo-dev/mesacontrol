@@ -7,6 +7,7 @@
     <title>Detalle Ticket - Mesa de Control</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 
     <style>
         /* ── Tokens compartidos ── */
@@ -492,208 +493,259 @@
 
 <div class="container-fluid px-3 px-md-4 mt-4 mb-5" style="max-width: 1400px; margin-left: auto; margin-right: auto;">
 
-    <!-- Alertas -->
-    <div th:if="${success}" class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 py-3 mb-3" role="alert">
-        <i class="bi bi-check-circle-fill"></i>
-        <span th:text="${success}">Operación exitosa</span>
-        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 py-3 mb-3" role="alert">
-        <i class="bi bi-exclamation-triangle-fill"></i>
-        <span th:text="${error}">Ha ocurrido un error</span>
-        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+    <!-- Fragmento único: todo lo que puede cambiar tras Iniciar Atención, Cerrar Ticket o Publicar Nota.
+         Incluye alertas + header + contenido + modal, para que ningún elemento quede "huérfano"
+         fuera del área que HTMX refresca (mismo criterio aplicado en listar-ticket.html). -->
+    <div id="detalle-ticket-container" th:fragment="detalleTicket">
 
-    <!-- Page header -->
-    <div class="page-header mb-4">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-            <div>
-                <a th:href="@{/tickets}" class="back-link">
-                    <i class="bi bi-arrow-left"></i>Volver al listado general
-                </a>
-                <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
-                    <span class="ticket-folio" th:text="${ticket.folio}">TK-12345</span>
-                    <span class="estado-badge"
-                          th:classappend="${ticket.estado.name() == 'ABIERTO'} ? 'estado-abierto' : (${ticket.estado.name() == 'EN_PROCESO'} ? 'estado-proceso' : 'estado-cerrado')"
-                          th:text="${ticket.estado.descripcion}">Estado</span>
+        <!-- Alertas -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 py-3 mb-3" role="alert">
+            <i class="bi bi-check-circle-fill"></i>
+            <span th:text="${success}">Operación exitosa</span>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 py-3 mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span th:text="${error}">Ha ocurrido un error</span>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Page header -->
+        <div class="page-header mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <a th:href="@{/tickets}" class="back-link">
+                        <i class="bi bi-arrow-left"></i>Volver al listado general
+                    </a>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+                        <span class="ticket-folio" th:text="${ticket.folio}">TK-12345</span>
+                        <span class="estado-badge"
+                              th:classappend="${ticket.estado.name() == 'ABIERTO'} ? 'estado-abierto' : (${ticket.estado.name() == 'EN_PROCESO'} ? 'estado-proceso' : 'estado-cerrado')"
+                              th:text="${ticket.estado.descripcion}">Estado</span>
+                    </div>
                 </div>
-            </div>
-            <div class="d-flex gap-2">
-                <form th:if="${ticket.estado.name() == 'ABIERTO'}" th:action="@{/tickets/{id}/iniciar(id=${ticket.id})}" method="POST" class="d-inline">
-                    <button type="submit" class="btn-iniciar">
-                        <i class="bi bi-play-circle-fill"></i>Iniciar Atención
+                <div class="d-flex gap-2">
+                    <form th:if="${ticket.estado.name() == 'ABIERTO'}" th:action="@{/tickets/{id}/iniciar(id=${ticket.id})}" method="POST" class="d-inline"
+                          th:attr="hx-post=@{/tickets/{id}/iniciar(id=${ticket.id})}"
+                          hx-target="#detalle-ticket-container"
+                          hx-swap="outerHTML">
+                        <button type="submit" class="btn-iniciar">
+                            <i class="bi bi-play-circle-fill"></i>Iniciar Atención
+                        </button>
+                    </form>
+                    <button th:if="${ticket.estado.name() == 'EN_PROCESO'}" type="button" class="btn-cerrar"
+                            data-bs-toggle="modal" data-bs-target="#modalCerrarTicket">
+                        <i class="bi bi-check-circle-fill"></i>Finalizar y Cerrar Ticket
                     </button>
-                </form>
-                <button th:if="${ticket.estado.name() == 'EN_PROCESO'}" type="button" class="btn-cerrar"
-                        data-bs-toggle="modal" data-bs-target="#modalCerrarTicket">
-                    <i class="bi bi-check-circle-fill"></i>Finalizar y Cerrar Ticket
-                </button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Contenido principal -->
-    <div class="row g-4">
+        <!-- Contenido principal -->
+        <div class="row g-4">
 
-        <!-- Información general -->
-        <div class="col-lg-7">
-            <div class="content-card">
-                <div class="card-section-header">
-                    <i class="bi bi-info-circle-fill"></i>
-                    <span>Información General</span>
-                </div>
-                <div class="card-section-body">
-
-                    <div class="row g-4 mb-3">
-                        <div class="col-sm-6">
-                            <span class="info-label">Unidad Médica</span>
-                            <p class="info-value" th:text="${ticket.clienteNombre}">Hospital General de Zona</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <span class="info-label">Equipo Médico</span>
-                            <p class="info-value-secondary" th:text="${ticket.equipoNombre + ' (No. de serie: ' + ticket.equipoNumeroSerie + ')'}">Ultrasonido (No. de serie: 987654)</p>
-                        </div>
+            <!-- Información general -->
+            <div class="col-lg-7">
+                <div class="content-card">
+                    <div class="card-section-header">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <span>Información General</span>
                     </div>
+                    <div class="card-section-body">
 
-                    <hr class="info-divider">
-
-                    <div class="row g-4 mb-3">
-                        <div class="col-sm-4">
-                            <span class="info-label">Tipo de Solicitud</span>
-                            <p class="mb-0"><span class="tag" th:text="${ticket.tipo.descripcion}">Servicio Técnico</span></p>
-                        </div>
-                        <div class="col-sm-4">
-                            <span class="info-label">Prioridad</span>
-                            <p class="mb-0"><span class="tag" th:text="${ticket.prioridad.descripcion}">Alta</span></p>
-                        </div>
-                        <div class="col-sm-4">
-                            <span class="info-label">Responsable Asignado</span>
-                            <p class="info-value" th:text="${ticket.responsableNombre}">Ing. Biomédico</p>
-                        </div>
-                    </div>
-
-                    <hr class="info-divider">
-
-                    <div class="row g-4 mb-3">
-                        <!-- Fecha de apertura -->
-                        <div class="col-sm-6">
-                            <span class="info-label">Fecha de Apertura</span>
-                            <p class="info-value-secondary d-flex align-items-center gap-2">
-                                <i class="bi bi-calendar-plus" style="color: var(--blue-main);"></i>
-                                <span th:text="${#temporals.format(ticket.fechaCreacion, 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</span>
-                            </p>
+                        <div class="row g-4 mb-3">
+                            <div class="col-sm-6">
+                                <span class="info-label">Unidad Médica</span>
+                                <p class="info-value" th:text="${ticket.clienteNombre}">Hospital General de Zona</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="info-label">Equipo Médico</span>
+                                <p class="info-value-secondary" th:text="${ticket.equipoNombre + ' (No. de serie: ' + ticket.equipoNumeroSerie + ')'}">Ultrasonido (No. de serie: 987654)</p>
+                            </div>
                         </div>
 
-                        <!-- Fecha de cierre (si CERRADO) -->
-                        <div class="col-sm-6">
-                            <th:block th:if="${ticket.estado.name() == 'CERRADO'}">
-                                <span class="info-label">Se cerró el: </span>
-                                <p class="mb-0">
+                        <hr class="info-divider">
+
+                        <div class="row g-4 mb-3">
+                            <div class="col-sm-4">
+                                <span class="info-label">Tipo de Solicitud</span>
+                                <p class="mb-0"><span class="tag" th:text="${ticket.tipo.descripcion}">Servicio Técnico</span></p>
+                            </div>
+                            <div class="col-sm-4">
+                                <span class="info-label">Prioridad</span>
+                                <p class="mb-0"><span class="tag" th:text="${ticket.prioridad.descripcion}">Alta</span></p>
+                            </div>
+                            <div class="col-sm-4">
+                                <span class="info-label">Responsable Asignado</span>
+                                <p class="info-value" th:text="${ticket.responsableNombre}">Ing. Biomédico</p>
+                            </div>
+                        </div>
+
+                        <hr class="info-divider">
+
+                        <div class="row g-4 mb-3">
+                            <!-- Fecha de apertura -->
+                            <div class="col-sm-6">
+                                <span class="info-label">Fecha de Apertura</span>
+                                <p class="info-value-secondary d-flex align-items-center gap-2">
+                                    <i class="bi bi-calendar-plus" style="color: var(--blue-main);"></i>
+                                    <span th:text="${#temporals.format(ticket.fechaCreacion, 'dd/MM/yyyy HH:mm')}">01/01/2026 10:00</span>
+                                </p>
+                            </div>
+
+                            <!-- Fecha de cierre (si CERRADO) -->
+                            <div class="col-sm-6">
+                                <th:block th:if="${ticket.estado.name() == 'CERRADO'}">
+                                    <span class="info-label">Se cerró el: </span>
+                                    <p class="mb-0">
                                     <span class="sla-inline sla-cerrado">
                                         <i class="bi bi-check-all"></i>
                                         <span th:text="${#temporals.format(ticket.fechaCierre, 'dd/MM/yyyy HH:mm')}">02/01/2026 10:00</span>
                                     </span>
-                                </p>
-                            </th:block>
+                                    </p>
+                                </th:block>
 
-                            <!-- Fecha de vencimiento SLA (si no CERRADO) -->
-                            <th:block th:unless="${ticket.estado.name() == 'CERRADO'}">
-                                <span class="info-label">Fecha de Vencimiento</span>
-                                <p class="mb-0">
-                                    <!-- Verde -->
-                                    <span th:if="${ticket.slaSemaforo == 'VERDE'}" class="sla-inline sla-verde">
+                                <!-- Fecha de vencimiento SLA (si no CERRADO) -->
+                                <th:block th:unless="${ticket.estado.name() == 'CERRADO'}">
+                                    <span class="info-label">Fecha de Vencimiento</span>
+                                    <p class="mb-0">
+                                        <!-- Verde -->
+                                        <span th:if="${ticket.slaSemaforo == 'VERDE'}" class="sla-inline sla-verde">
                                         <i class="bi bi-shield-fill-check"></i>
                                         <span th:text="${#temporals.format(ticket.fechaVencimientoSla, 'dd/MM/yyyy HH:mm')}">02/01/2026 10:00</span>
                                         <small style="opacity:.85; font-weight:500; font-size:0.7rem;">· A tiempo</small>
                                     </span>
-                                    <!-- Amarillo -->
-                                    <span th:if="${ticket.slaSemaforo == 'AMARILLO'}" class="sla-inline sla-amarillo">
+                                        <!-- Amarillo -->
+                                        <span th:if="${ticket.slaSemaforo == 'AMARILLO'}" class="sla-inline sla-amarillo">
                                         <i class="bi bi-hourglass-split"></i>
                                         <span th:text="${#temporals.format(ticket.fechaVencimientoSla, 'dd/MM/yyyy HH:mm')}">02/01/2026 10:00</span>
                                         <small style="opacity:.85; font-weight:500; font-size:0.7rem;">· Próximo a vencer</small>
                                     </span>
-                                    <!-- Rojo -->
-                                    <span th:if="${ticket.slaSemaforo == 'ROJO'}" class="sla-inline sla-rojo">
+                                        <!-- Rojo -->
+                                        <span th:if="${ticket.slaSemaforo == 'ROJO'}" class="sla-inline sla-rojo">
                                         <i class="bi bi-exclamation-octagon-fill"></i>
                                         <span th:text="${#temporals.format(ticket.fechaVencimientoSla, 'dd/MM/yyyy HH:mm')}">02/01/2026 10:00</span>
                                         <small style="opacity:.85; font-weight:500; font-size:0.7rem;">· Vencido</small>
                                     </span>
-                                </p>
-                            </th:block>
+                                    </p>
+                                </th:block>
+                            </div>
                         </div>
-                    </div>
 
-                    <hr class="info-divider">
+                        <hr class="info-divider">
 
-                    <!-- Descripción -->
-                    <div>
-                        <span class="info-label">Descripción Inicial de la Solicitud</span>
-                        <div class="desc-box" th:text="${ticket.descripcionInicial}">
-                            Detalles del reporte de falla o requerimiento de venta ingresado inicialmente...
+                        <!-- Descripción -->
+                        <div>
+                            <span class="info-label">Descripción Inicial de la Solicitud</span>
+                            <div class="desc-box" th:text="${ticket.descripcionInicial}">
+                                Detalles del reporte de falla o de venta ingresado inicialmente...
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Documentación de cierre -->
-                    <div class="cierre-box mt-3" th:if="${ticket.estado.name() == 'CERRADO'}">
-                        <h6><i class="bi bi-file-earmark-check-fill"></i>Documentación de Cierre Registrada</h6>
-                        <p th:if="${ticket.folioCotizacion != null}">
-                            Folio de Venta: <span class="mono" th:text="${ticket.folioCotizacion}"></span>
-                        </p>
-                        <p th:if="${ticket.folioOrdenServicio != null}">
-                            Folio de Orden de Servicio: <span class="mono" th:text="${ticket.folioOrdenServicio}"></span>
-                        </p>
-                    </div>
+                        <!-- Documentación de cierre -->
+                        <div class="cierre-box mt-3" th:if="${ticket.estado.name() == 'CERRADO'}">
+                            <h6><i class="bi bi-file-earmark-check-fill"></i>Documentación de Cierre Registrada</h6>
+                            <p th:if="${ticket.folioCotizacion != null}">
+                                Folio de Venta: <span class="mono" th:text="${ticket.folioCotizacion}"></span>
+                            </p>
+                            <p th:if="${ticket.folioOrdenServicio != null}">
+                                Folio de Orden de Servicio: <span class="mono" th:text="${ticket.folioOrdenServicio}"></span>
+                            </p>
+                        </div>
 
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Historial de seguimiento -->
-        <div class="col-lg-5">
-            <div class="content-card d-flex flex-column">
-                <div class="card-section-header">
-                    <i class="bi bi-chat-left-text-fill"></i>
-                    <span>Historial de Seguimiento</span>
-                </div>
+            <!-- Historial de seguimiento -->
+            <div class="col-lg-5">
+                <div class="content-card d-flex flex-column">
+                    <div class="card-section-header">
+                        <i class="bi bi-chat-left-text-fill"></i>
+                        <span>Historial de Seguimiento</span>
+                    </div>
 
-                <!-- Sin comentarios -->
-                <div th:if="${#lists.isEmpty(comentarios)}" class="empty-comments">
-                    <i class="bi bi-chat-square-dots"></i>
-                    <h6>Sin notas de seguimiento</h6>
-                    <p>Las actualizaciones del personal aparecerán aquí.</p>
-                </div>
+                    <!-- Sin comentarios -->
+                    <div th:if="${#lists.isEmpty(comentarios)}" class="empty-comments">
+                        <i class="bi bi-chat-square-dots"></i>
+                        <h6>Sin notas de seguimiento</h6>
+                        <p>Las actualizaciones del personal aparecerán aquí.</p>
+                    </div>
 
-                <!-- Timeline -->
-                <div class="timeline-scroll flex-grow-1" th:unless="${#lists.isEmpty(comentarios)}">
-                    <div class="timeline-wrap">
-                        <div th:each="comentario : ${comentarios}" class="timeline-item">
-                            <div class="timeline-dot-col">
-                                <div class="timeline-dot"></div>
-                                <div class="timeline-line"></div>
-                            </div>
-                            <div class="timeline-content">
-                                <div class="timeline-meta">
-                                    <span class="timeline-author" th:text="${comentario.autorNombre}">Nombre Autor</span>
-                                    <span class="timeline-date" th:text="${#temporals.format(comentario.fechaCreacion, 'dd/MM/yyyy HH:mm')}">01/01/2026 12:00</span>
+                    <!-- Timeline -->
+                    <div class="timeline-scroll flex-grow-1" th:unless="${#lists.isEmpty(comentarios)}">
+                        <div class="timeline-wrap">
+                            <div th:each="comentario : ${comentarios}" class="timeline-item">
+                                <div class="timeline-dot-col">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-line"></div>
                                 </div>
-                                <div class="timeline-text" th:text="${comentario.texto}">
-                                    Contenido de la nota interna...
+                                <div class="timeline-content">
+                                    <div class="timeline-meta">
+                                        <span class="timeline-author" th:text="${comentario.autorNombre}">Nombre Autor</span>
+                                        <span class="timeline-date" th:text="${#temporals.format(comentario.fechaCreacion, 'dd/MM/yyyy HH:mm')}">01/01/2026 12:00</span>
+                                    </div>
+                                    <div class="timeline-text" th:text="${comentario.texto}">
+                                        Contenido de la nota interna...
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Form nuevo comentario -->
-                <div class="comment-footer" th:if="${ticket.estado.name() != 'CERRADO'}">
-                    <form th:action="@{/tickets/{folio}/comentarios(folio=${ticket.folio})}" method="POST">
-                        <label for="textoComentario" class="visually-hidden">Escribir una actualización</label>
-                        <textarea class="comment-textarea"
-                                  id="textoComentario" name="textoComentario" rows="2"
-                                  placeholder="Escribir una actualización o nota interna..." required></textarea>
-                        <div class="text-end">
-                            <button type="submit" class="btn-publicar">
-                                <i class="bi bi-send-fill"></i>Publicar Nota
+                    <!-- Form nuevo comentario -->
+                    <div class="comment-footer" th:if="${ticket.estado.name() != 'CERRADO'}">
+                        <form th:action="@{/tickets/{folio}/comentarios(folio=${ticket.folio})}" method="POST"
+                              th:attr="hx-post=@{/tickets/{folio}/comentarios(folio=${ticket.folio})}"
+                              hx-target="#detalle-ticket-container"
+                              hx-swap="outerHTML">
+                            <label for="textoComentario" class="visually-hidden">Escribir una actualización</label>
+                            <textarea class="comment-textarea"
+                                      id="textoComentario" name="textoComentario" rows="2"
+                                      placeholder="Escribir una actualización o nota interna..." required></textarea>
+                            <div class="text-end">
+                                <button type="submit" class="btn-publicar">
+                                    <i class="bi bi-send-fill"></i>Publicar Nota
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Modal cierre de ticket -->
+        <!-- Movido DENTRO del fragmento: aparece/desaparece del DOM según ticket.estado,
+             por lo que debe refrescarse junto con el resto tras Iniciar Atención o Cerrar Ticket. -->
+        <div class="modal fade" id="modalCerrarTicket" tabindex="-1" aria-labelledby="modalCerrarTicketLabel" aria-hidden="true"
+             th:if="${ticket.estado.name() == 'EN_PROCESO'}">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <span class="modal-title-custom" id="modalCerrarTicketLabel">
+                        <i class="bi bi-lock-fill"></i>Cierre Definitivo de Ticket
+                    </span>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form th:action="@{/tickets/{id}/cerrar(id=${ticket.id})}" method="POST"
+                          th:attr="hx-post=@{/tickets/{id}/cerrar(id=${ticket.id})}"
+                          hx-target="#detalle-ticket-container"
+                          hx-swap="outerHTML"
+                          hx-on::before-request="bootstrap.Modal.getInstance(document.getElementById('modalCerrarTicket'))?.hide()">
+                        <div class="modal-body">
+                            <div class="modal-alert">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <span><strong>Atención:</strong> Esta acción es irreversible. El ticket pasará a histórico y se detendrá el contador de vencimiento.</span>
+                            </div>
+                            <label for="folioDocumento" class="modal-form-label"
+                                   th:text="${ticket.tipo.name() == 'VENTA'} ? 'Ingrese Folio de Venta *' : 'Ingrese Folio de Orden de Servicio *'"></label>
+                            <input type="text" class="modal-form-input" id="folioDocumento" name="folioDocumento" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn-modal-confirm">
+                                <i class="bi bi-check-lg"></i>Confirmar y Archivar
                             </button>
                         </div>
                     </form>
@@ -701,39 +753,7 @@
             </div>
         </div>
 
-    </div>
-</div>
-
-<!-- Modal cierre de ticket -->
-<div class="modal fade" id="modalCerrarTicket" tabindex="-1" aria-labelledby="modalCerrarTicketLabel" aria-hidden="true"
-     th:if="${ticket.estado.name() == 'EN_PROCESO'}">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="modal-title-custom" id="modalCerrarTicketLabel">
-                    <i class="bi bi-lock-fill"></i>Cierre Definitivo de Ticket
-                </span>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form th:action="@{/tickets/{id}/cerrar(id=${ticket.id})}" method="POST">
-                <div class="modal-body">
-                    <div class="modal-alert">
-                        <i class="bi bi-exclamation-triangle-fill"></i>
-                        <span><strong>Atención:</strong> Esta acción es irreversible. El ticket pasará a histórico y se detendrá el contador de vencimiento.</span>
-                    </div>
-                    <label for="folioDocumento" class="modal-form-label"
-                           th:text="${ticket.tipo.name() == 'VENTA'} ? 'Ingrese Folio de Venta *' : 'Ingrese Folio de Orden de Servicio *'"></label>
-                    <input type="text" class="modal-form-input" id="folioDocumento" name="folioDocumento" required>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn-modal-confirm">
-                        <i class="bi bi-check-lg"></i>Confirmar y Archivar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+    </div><!-- /#detalle-ticket-container -->
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

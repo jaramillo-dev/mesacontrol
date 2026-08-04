@@ -3,6 +3,7 @@ package com.biometec.mesacontrol.controller;
 import com.biometec.mesacontrol.dto.*;
 import com.biometec.mesacontrol.mapper.UsuarioMapper;
 import com.biometec.mesacontrol.service.UsuarioService;
+import io.github.wimdeblauwe.htmx.spring.boot.mvc.HtmxRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -55,10 +56,15 @@ public class UsuarioController {
     @GetMapping
     public String listarTodos(
             @PageableDefault(size = 10, sort = "nombre") Pageable pageable,
-            Model model) {
+            Model model, HtmxRequest htmxRequest) {
 
         UsuarioPageResponseDTO pagina = usuarioService.listarTodos(pageable);
         model.addAttribute("pagina", pagina);
+
+        if (htmxRequest.isHtmxRequest()) {
+            return "usuarios/listar-usuario :: listaUsuarios";
+        }
+
         return "usuarios/listar-usuario";
     }
 
@@ -93,9 +99,9 @@ public class UsuarioController {
      */
     @PostMapping("/nuevo")
     public String procesarCreacion(@Validated(OnCreate.class) @ModelAttribute("usuarioRequest") UsuarioRequestDTO dto,
-            BindingResult result,
-            RedirectAttributes redirectAttributes,
-            Model model) {
+                                   BindingResult result,
+                                   RedirectAttributes redirectAttributes,
+                                   Model model) {
 
         if (result.hasErrors()) {
 
@@ -207,17 +213,41 @@ public class UsuarioController {
      * <p>Utilizamos POST para mayor compatibilidad de los botones en
      * las tablas de la interfaz Thymeleaf.</p>
      *
+     * <p>El parámetro {@code pageable} se resuelve a partir del campo oculto "page"
+     * que viaja en el formulario, para poder devolver al usuario a la misma página
+     * de la tabla en la que se encontraba al hacer el toggle vía HTMX.</p>
+     *
      * @param id                 identificador del usuario
-     * @param redirectAttributes atributos para mostrar mensajes de retroalimentación
-     * @return redirección al listado
+     * @param pageable           página actual desde la que se disparó la acción
+     * @param model              modelo de la vista (usado en la respuesta HTMX)
+     * @param redirectAttributes atributos para mostrar mensajes de retroalimentación (fallback sin JS)
+     * @param htmxRequest        indica si la petición proviene de HTMX
+     * @return fragmento actualizado de la tabla (HTMX) o redirección al listado (fallback)
      */
     @PostMapping("/{id}/toggle-estado")
-    public String alternarEstado(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String alternarEstado(@PathVariable Long id,
+                                 @PageableDefault(size = 10, sort = "nombre") Pageable pageable,
+                                 Model model,
+                                 RedirectAttributes redirectAttributes,
+                                 HtmxRequest htmxRequest) {
         try {
             UsuarioResponseDTO usuario = usuarioService.toggleActivacion(id);
             String estado = usuario.estaActivo() ? "activado" : "desactivado";
+
+            if (htmxRequest.isHtmxRequest()) {
+                model.addAttribute("mensajeExito", "Usuario " + estado + " correctamente.");
+                model.addAttribute("pagina", usuarioService.listarTodos(pageable));
+                return "usuarios/listar-usuario :: listaUsuarios";
+            }
+
             redirectAttributes.addFlashAttribute("mensajeExito", "Usuario " + estado + " correctamente.");
         } catch (IllegalArgumentException e) {
+            if (htmxRequest.isHtmxRequest()) {
+                model.addAttribute("mensajeError", e.getMessage());
+                model.addAttribute("pagina", usuarioService.listarTodos(pageable));
+                return "usuarios/listar-usuario :: listaUsuarios";
+            }
+
             redirectAttributes.addFlashAttribute("mensajeError", e.getMessage());
         }
         return "redirect:/usuarios";

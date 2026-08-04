@@ -8,6 +8,7 @@
     <title>Mesa de Control - Usuarios</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 
     <style>
         /* ── Tokens compartidos ── */
@@ -296,137 +297,154 @@
 
 <div class="container-fluid px-3 px-md-4 mt-4 mb-5" style="max-width: 1400px; margin-left: auto; margin-right: auto;">
 
-    <!-- Alertas -->
-    <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 py-3 mb-3" role="alert">
-        <i class="bi bi-check-circle-fill"></i>
-        <span th:text="${mensajeExito}">Operación realizada con éxito</span>
-        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 py-3 mb-3" role="alert">
-        <i class="bi bi-exclamation-triangle-fill"></i>
-        <span th:text="${mensajeError}">Ha ocurrido un inconveniente</span>
-        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+    <!-- Fragmento único: alertas + tabla + paginación. Todo lo que puede cambiar
+         tras el toggle de estado o la navegación de páginas vive aquí adentro,
+         para que ningún elemento quede fuera del área que HTMX refresca. -->
+    <div id="usuarios-container" th:fragment="listaUsuarios">
 
-    <!-- Page header -->
-    <div class="page-header mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
-        <div>
-            <h2>
-                <i class="bi bi-people-fill"></i>Gestión de Usuarios
-            </h2>
-            <p>Administración de cuentas, asignación de roles y control de activación del personal.</p>
+        <!-- Alertas -->
+        <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 py-3 mb-3" role="alert">
+            <i class="bi bi-check-circle-fill"></i>
+            <span th:text="${mensajeExito}">Operación realizada con éxito</span>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <a th:href="@{/usuarios/nuevo}" class="btn-nuevo">
-            <i class="bi bi-person-plus-fill"></i>Nuevo Usuario
-        </a>
-    </div>
+        <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 py-3 mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span th:text="${mensajeError}">Ha ocurrido un inconveniente</span>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
 
-    <!-- Tabla -->
-    <div class="table-card">
-        <div class="table-scroll">
-            <table class="data-table">
-                <thead>
-                <tr>
-                    <th style="padding-left: 20px;">Nombre</th>
-                    <th>Email Institucional</th>
-                    <th>Rol del Sistema</th>
-                    <th>Estado</th>
-                    <th style="text-align: center; padding-right: 20px;">Acciones</th>
-                </tr>
-                </thead>
-                <tbody>
+        <!-- Page header -->
+        <div class="page-header mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+            <div>
+                <h2>
+                    <i class="bi bi-people-fill"></i>Gestión de Usuarios
+                </h2>
+                <p>Administración de cuentas, asignación de roles y control de activación del personal.</p>
+            </div>
+            <a th:href="@{/usuarios/nuevo}" class="btn-nuevo">
+                <i class="bi bi-person-plus-fill"></i>Nuevo Usuario
+            </a>
+        </div>
 
-                <tr th:each="usuario : ${pagina.contenido}">
+        <!-- Tabla -->
+        <div class="table-card">
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th style="padding-left: 20px;">Nombre</th>
+                        <th>Email Institucional</th>
+                        <th>Rol del Sistema</th>
+                        <th>Estado</th>
+                        <th style="text-align: center; padding-right: 20px;">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
 
-                    <!-- Nombre -->
-                    <td style="padding-left: 20px;">
-                        <span class="cell-nombre" th:text="${usuario.nombre}">Nombre Completo</span>
-                    </td>
+                    <tr th:each="usuario : ${pagina.contenido}">
 
-                    <!-- Email -->
-                    <td>
-                        <span class="cell-email" th:text="${usuario.email}">email@ejemplo.com</span>
-                    </td>
+                        <!-- Nombre -->
+                        <td style="padding-left: 20px;">
+                            <span class="cell-nombre" th:text="${usuario.nombre}">Nombre Completo</span>
+                        </td>
 
-                    <!-- Rol -->
-                    <td>
+                        <!-- Email -->
+                        <td>
+                            <span class="cell-email" th:text="${usuario.email}">email@ejemplo.com</span>
+                        </td>
+
+                        <!-- Rol -->
+                        <td>
                             <span class="rol-badge"
                                   th:classappend="${usuario.rol == 'ADMIN'} ? 'rol-admin' : (${usuario.rol == 'VENTAS'} ? 'rol-ventas' : 'rol-tecnico')"
                                   th:text="${usuario.rol}">ROL</span>
-                    </td>
+                        </td>
 
-                    <!-- Estado -->
-                    <td>
+                        <!-- Estado -->
+                        <td>
                             <span th:if="${usuario.activo}" class="estado-badge estado-activo">
                                 <i class="bi bi-check-circle-fill" style="font-size: 0.7rem;"></i>Activo
                             </span>
-                        <span th:unless="${usuario.activo}" class="estado-badge estado-inactivo">
+                            <span th:unless="${usuario.activo}" class="estado-badge estado-inactivo">
                                 <i class="bi bi-x-circle-fill" style="font-size: 0.7rem;"></i>Inactivo
                             </span>
-                    </td>
+                        </td>
 
-                    <!-- Acciones -->
-                    <td style="text-align: center; padding-right: 20px;">
-                        <div class="d-flex justify-content-center gap-2">
+                        <!-- Acciones -->
+                        <td style="text-align: center; padding-right: 20px;">
+                            <div class="d-flex justify-content-center gap-2">
 
-                            <!-- Editar -->
-                            <a th:href="@{/usuarios/{id}/editar(id=${usuario.id})}"
-                               class="btn-action btn-action-edit"
-                               title="Editar Usuario">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
+                                <!-- Editar -->
+                                <a th:href="@{/usuarios/{id}/editar(id=${usuario.id})}"
+                                   class="btn-action btn-action-edit"
+                                   title="Editar Usuario">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
 
-                            <!-- Toggle estado -->
-                            <form th:action="@{/usuarios/{id}/toggle-estado(id=${usuario.id})}"
-                                  method="post" class="d-inline m-0">
-                                <button type="submit"
-                                        class="btn-action"
-                                        th:classappend="${usuario.activo} ? 'btn-action-deactivate' : 'btn-action-activate'"
-                                        th:title="${usuario.activo} ? 'Desactivar Cuenta' : 'Activar Cuenta'">
-                                    <i class="bi"
-                                       th:classappend="${usuario.activo} ? 'bi-person-x-fill' : 'bi-person-check-fill'"></i>
-                                </button>
-                            </form>
+                                <!-- Toggle estado -->
+                                <form th:action="@{/usuarios/{id}/toggle-estado(id=${usuario.id})}"
+                                      method="post" class="d-inline m-0"
+                                      th:attr="hx-post=@{/usuarios/{id}/toggle-estado(id=${usuario.id})}"
+                                      hx-target="#usuarios-container"
+                                      hx-swap="outerHTML">
+                                    <!-- Preserva la página actual: sin esto, el fragmento devuelto
+                                         tras el toggle volvería siempre a la página 1 -->
+                                    <input type="hidden" name="page" th:value="${pagina.paginaActual}">
+                                    <button type="submit"
+                                            class="btn-action"
+                                            th:classappend="${usuario.activo} ? 'btn-action-deactivate' : 'btn-action-activate'"
+                                            th:title="${usuario.activo} ? 'Desactivar Cuenta' : 'Activar Cuenta'">
+                                        <i class="bi"
+                                           th:classappend="${usuario.activo} ? 'bi-person-x-fill' : 'bi-person-check-fill'"></i>
+                                    </button>
+                                </form>
 
-                        </div>
-                    </td>
-                </tr>
+                            </div>
+                        </td>
+                    </tr>
 
-                <!-- Empty state -->
-                <tr th:if="${pagina.contenido.isEmpty()}">
-                    <td colspan="5" style="padding: 0;">
-                        <div class="empty-state">
-                            <i class="bi bi-people"></i>
-                            <h5>No hay usuarios registrados</h5>
-                            <p>No existen cuentas de personal registradas en el sistema.</p>
-                        </div>
-                    </td>
-                </tr>
+                    <!-- Empty state -->
+                    <tr th:if="${pagina.contenido.isEmpty()}">
+                        <td colspan="5" style="padding: 0;">
+                            <div class="empty-state">
+                                <i class="bi bi-people"></i>
+                                <h5>No hay usuarios registrados</h5>
+                                <p>No existen cuentas de personal registradas en el sistema.</p>
+                            </div>
+                        </td>
+                    </tr>
 
-                </tbody>
-            </table>
-        </div>
+                    </tbody>
+                </table>
+            </div>
 
-        <!-- Paginación -->
-        <div class="pag-footer" th:if="${pagina.totalPaginas > 1}">
+            <!-- Paginación -->
+            <div class="pag-footer" th:if="${pagina.totalPaginas > 1}">
             <span class="pag-info">
                 Página <strong th:text="${pagina.paginaActual + 1}">1</strong>
                 de <strong th:text="${pagina.totalPaginas}">5</strong>
             </span>
-            <div class="d-flex gap-2">
-                <a class="btn-pag"
-                   th:classappend="${pagina.paginaActual == 0} ? 'disabled'"
-                   th:href="@{/usuarios(page=${pagina.paginaActual - 1})}">
-                    <i class="bi bi-chevron-left" style="font-size: 0.7rem;"></i>Anterior
-                </a>
-                <a class="btn-pag"
-                   th:classappend="${pagina.paginaActual + 1 == pagina.totalPaginas} ? 'disabled'"
-                   th:href="@{/usuarios(page=${pagina.paginaActual + 1})}">
-                    Siguiente<i class="bi bi-chevron-right" style="font-size: 0.7rem;"></i>
-                </a>
+                <div class="d-flex gap-2">
+                    <a class="btn-pag"
+                       th:classappend="${pagina.paginaActual == 0} ? 'disabled'"
+                       th:href="@{/usuarios(page=${pagina.paginaActual - 1})}"
+                       th:attr="hx-get=@{/usuarios(page=${pagina.paginaActual - 1})}"
+                       hx-target="#usuarios-container" hx-swap="outerHTML" hx-push-url="true">
+                        <i class="bi bi-chevron-left" style="font-size: 0.7rem;"></i>Anterior
+                    </a>
+                    <a class="btn-pag"
+                       th:classappend="${pagina.paginaActual + 1 == pagina.totalPaginas} ? 'disabled'"
+                       th:href="@{/usuarios(page=${pagina.paginaActual + 1})}"
+                       th:attr="hx-get=@{/usuarios(page=${pagina.paginaActual + 1})}"
+                       hx-target="#usuarios-container" hx-swap="outerHTML" hx-push-url="true">
+                        Siguiente<i class="bi bi-chevron-right" style="font-size: 0.7rem;"></i>
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
+
+    </div><!-- /#usuarios-container -->
 
 </div>
 

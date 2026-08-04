@@ -1,9 +1,9 @@
 # Conexión a Base de Datos
 spring:
   datasource:
-    url: jdbc:postgresql://mvp-db-demo.postgres.database.azure.com:5432/mesacontrol_db
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/mesacontrol_db
+    username: admin_biometec
+    password: admin_password
     driver-class-name: org.postgresql.Driver
 
   # JPA / Hibernate
