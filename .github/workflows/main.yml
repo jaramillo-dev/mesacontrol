@@ -35,9 +35,9 @@ jobs:
       - name: Set up Java version
         uses: actions/setup-java@v4
         with:
-          java-version: '25'
+          java-version: '21'
           distribution: 'microsoft'
-          cache: 'maven' # 2. Agregamos caché para acelerar futuros builds
+          cache: 'maven'
 
       - name: Build and Test with Maven
         # 3. Inyectamos las credenciales para que Spring Boot se conecte a la DB del CI
