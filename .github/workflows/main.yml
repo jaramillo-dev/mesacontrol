@@ -4,7 +4,7 @@ name: Build and deploy JAR app to Azure Web App - mvp-spring-demo
 on:
   push:
     branches:
-      - release/mvp-demo
+      - main
   workflow_dispatch:
 
 jobs:
